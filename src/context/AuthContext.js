@@ -25,6 +25,7 @@ export function AuthProvider({ children }) {
     parentPin: "1234",
     avatarKid: "avatar1",
     avatarParent: "parent1",
+    isAdmin: false,
   });
   const [needsProfileSetup, setNeedsProfileSetup] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -42,9 +43,10 @@ export function AuthProvider({ children }) {
       try {
         const session = await getSavedSession();
         if (session?.user) {
-          setUser(session.user);
+          const isAdmin = Boolean(session.profile?.isAdmin ?? session.user?.isAdmin ?? false);
+          setUser({ ...session.user, isAdmin });
           if (session.profile) {
-            setProfile(session.profile);
+            setProfile({ ...session.profile, isAdmin });
           }
           if (session.needsProfileSetup) {
             setNeedsProfileSetup(true);
@@ -65,9 +67,13 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const res = await authSignIn({ email, password });
-    setUser(res.user);
-    if (res.profile) {
-      setProfile(res.profile);
+    const isAdmin = Boolean(res.profile?.isAdmin ?? res.user?.isAdmin ?? false);
+    const enrichedUser = res.user ? { ...res.user, isAdmin } : null;
+    const enrichedProfile = res.profile ? { ...res.profile, isAdmin } : null;
+
+    setUser(enrichedUser);
+    if (enrichedProfile) {
+      setProfile(enrichedProfile);
     }
     if (res.needsProfileSetup) {
       setNeedsProfileSetup(true);
@@ -77,20 +83,23 @@ export function AuthProvider({ children }) {
     setStats(getStatsData());
     const phrases = await getCustomPhrases();
     setCustomPhrases(phrases);
-    return res;
+    return { ...res, user: enrichedUser, profile: enrichedProfile };
   };
 
   const register = async ({ email, password, kidName, parentName, pin }) => {
     const res = await authSignUp({ email, password, kidName, parentName, pin });
-    setUser(res.user);
-    if (res.profile) {
-      setProfile(res.profile);
+    const enrichedUser = res.user ? { ...res.user, isAdmin: false } : null;
+    const enrichedProfile = res.profile ? { ...res.profile, isAdmin: false } : null;
+
+    setUser(enrichedUser);
+    if (enrichedProfile) {
+      setProfile(enrichedProfile);
     }
     setNeedsProfileSetup(false);
     setStats(getStatsData());
     const phrases = await getCustomPhrases();
     setCustomPhrases(phrases);
-    return res;
+    return { ...res, user: enrichedUser, profile: enrichedProfile };
   };
 
   const logout = async () => {
@@ -104,6 +113,7 @@ export function AuthProvider({ children }) {
       parentPin: "1234",
       avatarKid: "avatar1",
       avatarParent: "parent1",
+      isAdmin: false,
     });
   };
 
@@ -121,7 +131,11 @@ export function AuthProvider({ children }) {
 
   const updateProfileData = async (newProfileData) => {
     setProfile((prev) => {
-      const updated = { ...prev, ...newProfileData };
+      const updated = {
+        ...prev,
+        ...newProfileData,
+        isAdmin: newProfileData.isAdmin !== undefined ? Boolean(newProfileData.isAdmin) : Boolean(prev?.isAdmin),
+      };
       if (typeof window !== "undefined") {
         const stored = localStorage.getItem("eco_kids_user");
         if (stored) {

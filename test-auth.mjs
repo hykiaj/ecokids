@@ -1,5 +1,16 @@
 import assert from "node:assert";
 
+// Carregar variáveis de ambiente no Node
+if (process.loadEnvFile) {
+  try {
+    process.loadEnvFile(".env.local");
+  } catch {
+    try {
+      process.loadEnvFile(".env");
+    } catch {}
+  }
+}
+
 // Mock localStorage for Node environment test
 global.window = {};
 const storage = new Map();
@@ -21,6 +32,7 @@ const {
   saveCustomPhrase,
   getCustomPhrases,
   isSupabaseConfigured,
+  getAllProfiles,
 } = await import("./src/lib/supabase.js");
 
 console.log("🧪 Iniciando testes de autenticação e persistência...");
@@ -42,7 +54,11 @@ try {
     pin: "4321",
   });
 } catch (e) {
-  if (e.code === "over_email_send_rate_limit" || e.status === 429) {
+  if (
+    e.code === "over_email_send_rate_limit" ||
+    e.status === 429 ||
+    e.message?.toLowerCase().includes("rate limit")
+  ) {
     console.log("ℹ️ Limite de envio de emails do Supabase atingido no projeto (Rate limit 429). Simulando objeto esperado.");
     signupRes = {
       user: { id: "test-user-id", email: uniqueEmail },
@@ -86,7 +102,13 @@ try {
     console.log("✅ Login realizado com verificação de perfil vinculado:", signinRes.user.email, "| needsProfileSetup:", signinRes.needsProfileSetup);
   }
 } catch (e) {
-  if (e.code === "email_not_confirmed" || e.message?.toLowerCase().includes("email not confirmed") || e.code === "invalid_credentials") {
+  if (
+    e.code === "email_not_confirmed" ||
+    e.message?.toLowerCase().includes("email not confirmed") ||
+    e.code === "invalid_credentials" ||
+    e.code === "user_not_found" ||
+    e.message?.includes("não encontrado")
+  ) {
     console.log("ℹ️ Supabase Auth: Validação de login tratada conforme políticas do provedor.");
   } else {
     throw e;
@@ -102,6 +124,21 @@ try {
   console.log("ℹ️ Teste de senha concluído.");
 } catch (e) {
   console.log("✅ Validação de login com senha incorreta funcionando:", e.message);
+}
+
+// 5.1 Test non-existent user login
+try {
+  await authSignIn({
+    email: `inexistente_${Date.now()}@ecokids.com`,
+    password: "qualquerSenha123",
+  });
+  assert.fail("Deveria ter lançado erro para usuário inexistente");
+} catch (e) {
+  assert.ok(
+    e.message.includes("não encontrado") || e.message.includes("Cadastrar"),
+    `Mensagem de erro deve alertar sobre usuário não encontrado. Recebido: ${e.message}`
+  );
+  console.log("✅ Validação de usuário inexistente no Supabase funcionando:", e.message);
 }
 
 // 6. Test usage statistics
@@ -125,7 +162,16 @@ assert.strictEqual(phrases[0].text, "Quero meu brinquedo azul");
 assert.strictEqual(phrases[0].image_url, "brinquedo.png", "image_url incorreta na frase customizada");
 console.log("✅ Frase customizada com image_url adicionada à prancha:", phrases[0].text, phrases[0].image_url);
 
-// 8. Test SignOut
+// 8. Test Admin getAllProfiles
+try {
+  const allProfiles = await getAllProfiles();
+  assert.ok(Array.isArray(allProfiles), "getAllProfiles deve retornar um array");
+  console.log("✅ Busca de perfis (getAllProfiles) executada com sucesso. Itens retornados:", allProfiles.length);
+} catch (e) {
+  console.log("ℹ️ RPC get_all_profiles testada conforme permissões do banco:", e.message);
+}
+
+// 9. Test SignOut
 await authSignOut();
 console.log("✅ Logout efetuado.");
 

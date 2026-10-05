@@ -1,20 +1,24 @@
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabaseAnonKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  "";
 
 export const isSupabaseConfigured = () => {
   return (
     Boolean(supabaseUrl) &&
     Boolean(supabaseAnonKey) &&
     !supabaseUrl.includes("seu-projeto") &&
-    !supabaseAnonKey.includes("sua-chave-anon")
+    !supabaseAnonKey.includes("sua-chave-anon") &&
+    !supabaseAnonKey.includes("sua-chave-publica")
   );
 };
 
 // Create client safely: if url is not valid or empty, provide a dummy client to avoid startup crash
 let client = null;
-if (supabaseUrl && supabaseAnonKey) {
+if (isSupabaseConfigured()) {
   try {
     client = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
@@ -42,186 +46,264 @@ export function getStoragePublicUrl(bucket, path) {
   return "";
 }
 
-// Local storage keys for fallback demo mode
+// Local storage keys
 const STORAGE_USER_KEY = "eco_kids_user";
 const STORAGE_STATS_KEY = "eco_kids_stats";
 const STORAGE_PHRASES_KEY = "eco_kids_custom_phrases";
 
-// Helpers for Auth and Database
-export async function authSignUp({ email, password, kidName, parentName, pin }) {
-  if (isSupabaseConfigured() && supabase) {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          kid_name: kidName,
-          parent_name: parentName,
-          parent_pin: pin || password,
-          avatar_kid: "avatar1",
-          avatar_parent: "parent1",
-        },
-      },
+// Helper para verificar se um e-mail/usuário já existe no Supabase
+export async function checkUserExists(email) {
+  if (!isSupabaseConfigured() || !supabase || !email) return null;
+  try {
+    const { data, error } = await supabase.rpc("check_user_exists", {
+      email_input: email.trim().toLowerCase(),
     });
-
-    if (error) throw error;
-
-    // Create or update profiles row if table exists
-    if (data.user) {
-      try {
-        await supabase.from("profiles").upsert({
-          id: data.user.id,
-          email,
-          kid_name: kidName,
-          parent_name: parentName,
-          parent_pin: pin || password,
-          avatar_kid: "avatar1",
-          avatar_parent: "parent1",
-          updated_at: new Date().toISOString(),
-        });
-      } catch (e) {
-        console.warn("Tabela profiles não configurada no Supabase ainda:", e);
-      }
+    if (error) {
+      return null;
     }
-
-    return {
-      user: data.user,
-      profile: {
-        id: data.user.id,
-        email,
-        kidName,
-        parentName,
-        parentPin: pin || password,
-        avatarKid: "avatar1",
-        avatarParent: "parent1",
-      },
-    };
-  } else {
-    // Fallback Local Storage Mode
-    const mockUser = {
-      id: "demo-user-" + Date.now(),
-      email,
-    };
-    const mockProfile = {
-      id: mockUser.id,
-      email,
-      kidName: kidName || "Sofia",
-      parentName: parentName || "Mariana",
-      parentPin: pin || password || "1234",
-      avatarKid: "avatar1",
-      avatarParent: "parent1",
-    };
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_USER_KEY, JSON.stringify({ user: mockUser, profile: mockProfile, password }));
-    }
-
-    return { user: mockUser, profile: mockProfile };
+    return Boolean(data);
+  } catch {
+    return null;
   }
 }
 
-export async function authSignIn({ email, password }) {
-  if (isSupabaseConfigured() && supabase) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+// Helpers for Auth and Database
+export async function authSignUp({ email, password, kidName, parentName, pin }) {
+  if (!isSupabaseConfigured() || !supabase) {
+    throw new Error(
+      "O Supabase não está configurado. O cadastro deve ser realizado exclusivamente pelo Supabase. Verifique as credenciais no arquivo .env."
+    );
+  }
 
-    if (error) throw error;
+  const cleanEmail = email ? email.trim() : "";
+  if (!cleanEmail || !password) {
+    throw new Error("Por favor, preencha o e-mail e a senha.");
+  }
 
-    let profile = {
-      id: data.user.id,
-      email: data.user.email,
-      kidName: data.user.user_metadata?.kid_name || "Nome da criança",
-      parentName: data.user.user_metadata?.parent_name || "Responsável",
-      parentPin: data.user.user_metadata?.parent_pin || password,
-      avatarKid: data.user.user_metadata?.avatar_kid || "avatar1",
-      avatarParent: data.user.user_metadata?.avatar_parent || "parent1",
-    };
+  // Verificar se o usuário já existe no Supabase antes de cadastrar
+  const alreadyExists = await checkUserExists(cleanEmail);
+  if (alreadyExists === true) {
+    throw new Error(
+      "Este e-mail já está cadastrado. Por favor, acesse a aba Entrar para fazer login."
+    );
+  }
 
-    let needsProfileSetup = false;
+  const { data, error } = await supabase.auth.signUp({
+    email: cleanEmail,
+    password,
+    options: {
+      data: {
+        kid_name: kidName || "Nome da criança",
+        parent_name: parentName || "Nome do Responsável",
+        parent_pin: pin || password || "1234",
+        avatar_kid: "avatar1",
+        avatar_parent: "parent1",
+      },
+    },
+  });
 
+  if (error) {
+    const err = new Error(error.message || "Erro ao realizar cadastro no Supabase.");
+    err.code = error.code;
+    err.status = error.status;
+    throw err;
+  }
+
+  // Supabase retorna identities vazio quando o e-mail já existe
+  if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    throw new Error(
+      "Este e-mail já está cadastrado. Por favor, acesse a aba Entrar para fazer login."
+    );
+  }
+
+  // Create or update profiles row if table exists
+  if (data?.user) {
     try {
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", data.user.id)
-        .maybeSingle();
-
-      if (profileData) {
-        profile = {
-          ...profile,
-          kidName: profileData.kid_name || profile.kidName,
-          parentName: profileData.parent_name || profile.parentName,
-          parentPin: profileData.parent_pin || profile.parentPin,
-          avatarKid: profileData.avatar_kid || profile.avatarKid,
-          avatarParent: profileData.avatar_parent || profile.avatarParent,
-        };
-
-        const isDefaultKid = !profileData.kid_name || profileData.kid_name === "Nome da criança";
-        const isDefaultParent =
-          !profileData.parent_name ||
-          profileData.parent_name === "Nome do Responsável" ||
-          profileData.parent_name === "Responsável";
-
-        if (isDefaultKid || isDefaultParent) {
-          needsProfileSetup = true;
-        }
-      } else {
-        // Usuário no Auth mas sem registro vinculado na tabela profiles
-        needsProfileSetup = true;
-      }
-    } catch {
-      needsProfileSetup = true;
+      await supabase.from("profiles").upsert({
+        id: data.user.id,
+        email: cleanEmail,
+        kid_name: kidName || "Nome da criança",
+        parent_name: parentName || "Nome do Responsável",
+        parent_pin: pin || password || "1234",
+        avatar_kid: "avatar1",
+        avatar_parent: "parent1",
+        updated_at: new Date().toISOString(),
+      });
+    } catch (e) {
+      console.warn("Tabela profiles não configurada no Supabase ainda:", e);
     }
+  }
 
-    return { user: data.user, profile, needsProfileSetup };
-  } else {
-    // Fallback Local Storage Mode
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem(STORAGE_USER_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.user.email === email) {
-          if (parsed.password && parsed.password !== password) {
-            throw new Error("Senha incorreta.");
-          }
-          const isDefaultKid = !parsed.profile?.kidName || parsed.profile.kidName === "Nome da criança";
-          const isDefaultParent =
-            !parsed.profile?.parentName ||
-            parsed.profile.parentName === "Nome do Responsável" ||
-            parsed.profile.parentName === "Responsável";
-
-          return {
-            user: parsed.user,
-            profile: parsed.profile,
-            needsProfileSetup: isDefaultKid || isDefaultParent,
-          };
-        }
-      }
-    }
-
-    // Default mock demo login if not registered
-    const mockUser = {
-      id: "demo-user-1",
-      email: email || "usuario@ecokids.com",
-    };
-    const mockProfile = {
-      id: mockUser.id,
-      email: mockUser.email,
-      kidName: "Nome da criança",
-      parentName: "Nome do Responsável",
-      parentPin: password || "1234",
+  return {
+    user: data.user,
+    session: data.session,
+    profile: {
+      id: data.user?.id,
+      email: cleanEmail,
+      kidName: kidName || "Nome da criança",
+      parentName: parentName || "Nome do Responsável",
+      parentPin: pin || password || "1234",
       avatarKid: "avatar1",
       avatarParent: "parent1",
-    };
+      isAdmin: false,
+    },
+  };
+}
 
-    if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_USER_KEY, JSON.stringify({ user: mockUser, profile: mockProfile, password }));
+export async function authSignIn({ email, password }) {
+  if (!isSupabaseConfigured() || !supabase) {
+    throw new Error(
+      "O Supabase não está configurado. O login deve ser realizado exclusivamente pelo Supabase. Verifique suas variáveis de ambiente no arquivo .env."
+    );
+  }
+
+  const cleanEmail = email ? email.trim() : "";
+  if (!cleanEmail || !password) {
+    throw new Error("Por favor, preencha o e-mail e a senha.");
+  }
+
+  // 1. Verificar se usuário existe no Supabase (se RPC check_user_exists estiver configurada)
+  const userExists = await checkUserExists(cleanEmail);
+  if (userExists === false) {
+    const err = new Error(
+      "Usuário não encontrado. Este e-mail não possui cadastro. Crie sua conta na aba Cadastrar."
+    );
+    err.code = "user_not_found";
+    err.status = 404;
+    throw err;
+  }
+
+  // 2. Realizar autenticação no Supabase
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: cleanEmail,
+    password,
+  });
+
+  if (error) {
+    if (
+      error.code === "invalid_credentials" ||
+      error.message?.toLowerCase().includes("invalid login credentials")
+    ) {
+      const msg =
+        userExists === true
+          ? "Senha incorreta. Verifique sua senha e tente novamente."
+          : "Usuário não encontrado ou senha incorreta. Se você ainda não possui cadastro, crie sua conta na aba Cadastrar.";
+      const err = new Error(msg);
+      err.code = "invalid_credentials";
+      err.status = error.status || 400;
+      throw err;
     }
 
-    return { user: mockUser, profile: mockProfile, needsProfileSetup: true };
+    if (
+      error.code === "email_not_confirmed" ||
+      error.message?.toLowerCase().includes("email not confirmed")
+    ) {
+      const err = new Error(
+        "E-mail ainda não confirmado. Por favor, verifique sua caixa de entrada para confirmar o e-mail antes de entrar (ou desative a confirmação de e-mail no painel do Supabase)."
+      );
+      err.code = "email_not_confirmed";
+      err.status = error.status || 400;
+      throw err;
+    }
+
+    const err = new Error(error.message || "Erro ao realizar login no Supabase.");
+    err.code = error.code;
+    err.status = error.status;
+    throw err;
   }
+
+  const metadataIsAdmin = Boolean(
+    data.user?.app_metadata?.is_admin ||
+    data.user?.app_metadata?.role === "admin" ||
+    data.user?.user_metadata?.is_admin ||
+    data.user?.user_metadata?.isAdmin
+  );
+
+  let profile = {
+    id: data.user.id,
+    email: data.user.email,
+    kidName: data.user.user_metadata?.kid_name || "Nome da criança",
+    parentName: data.user.user_metadata?.parent_name || "Responsável",
+    parentPin: data.user.user_metadata?.parent_pin || password,
+    avatarKid: data.user.user_metadata?.avatar_kid || "avatar1",
+    avatarParent: data.user.user_metadata?.avatar_parent || "parent1",
+    isAdmin: metadataIsAdmin,
+  };
+
+  let needsProfileSetup = false;
+
+  try {
+    let { data: profileData, error: profileErr } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", data.user.id)
+      .maybeSingle();
+
+    if (profileErr) {
+      console.warn("Aviso ao buscar perfil na tabela profiles:", profileErr.message);
+    }
+
+    // Se a linha ainda não existe na tabela profiles, cria automaticamente
+    if (!profileData) {
+      try {
+        const autoProfile = {
+          id: data.user.id,
+          email: data.user.email,
+          kid_name: data.user.user_metadata?.kid_name || "Nome da criança",
+          parent_name: data.user.user_metadata?.parent_name || "Nome do Responsável",
+          parent_pin: data.user.user_metadata?.parent_pin || password || "1234",
+          avatar_kid: data.user.user_metadata?.avatar_kid || "avatar1",
+          avatar_parent: data.user.user_metadata?.avatar_parent || "parent1",
+          is_admin: metadataIsAdmin,
+        };
+        const { data: created } = await supabase
+          .from("profiles")
+          .upsert(autoProfile)
+          .select()
+          .maybeSingle();
+        if (created) profileData = created;
+      } catch (insertErr) {
+        console.warn("Aviso ao auto-criar perfil:", insertErr.message);
+      }
+    }
+
+    const isAdmin = Boolean(profileData?.is_admin || metadataIsAdmin);
+
+    if (profileData) {
+      profile = {
+        ...profile,
+        kidName: profileData.kid_name || profile.kidName,
+        parentName: profileData.parent_name || profile.parentName,
+        parentPin: profileData.parent_pin || profile.parentPin,
+        avatarKid: profileData.avatar_kid || profile.avatarKid,
+        avatarParent: profileData.avatar_parent || profile.avatarParent,
+        isAdmin,
+      };
+
+      const isDefaultKid = !profileData.kid_name || profileData.kid_name === "Nome da criança";
+      const isDefaultParent =
+        !profileData.parent_name ||
+        profileData.parent_name === "Nome do Responsável" ||
+        profileData.parent_name === "Responsável";
+
+      if (isDefaultKid || isDefaultParent) {
+        needsProfileSetup = true;
+      }
+    } else {
+      // Usuário no Auth mas sem registro vinculado na tabela profiles
+      needsProfileSetup = true;
+      profile.isAdmin = isAdmin;
+    }
+  } catch {
+    needsProfileSetup = true;
+  }
+
+  const enrichedUser = {
+    ...data.user,
+    isAdmin: profile.isAdmin,
+  };
+
+  return { user: enrichedUser, profile, needsProfileSetup };
 }
 
 export async function authSignOut() {
@@ -328,6 +410,13 @@ export async function getSavedSession() {
     const { data } = await supabase.auth.getSession();
     if (data?.session?.user) {
       const user = data.session.user;
+      const metadataIsAdmin = Boolean(
+        user?.app_metadata?.is_admin ||
+        user?.app_metadata?.role === "admin" ||
+        user?.user_metadata?.is_admin ||
+        user?.user_metadata?.isAdmin
+      );
+
       let profile = {
         id: user.id,
         email: user.email,
@@ -336,16 +425,42 @@ export async function getSavedSession() {
         parentPin: user.user_metadata?.parent_pin || "",
         avatarKid: user.user_metadata?.avatar_kid || "avatar1",
         avatarParent: user.user_metadata?.avatar_parent || "parent1",
+        isAdmin: metadataIsAdmin,
       };
 
       let needsProfileSetup = false;
 
       try {
-        const { data: profileData } = await supabase
+        let { data: profileData } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", user.id)
           .maybeSingle();
+
+        if (!profileData) {
+          try {
+            const autoProfile = {
+              id: user.id,
+              email: user.email,
+              kid_name: user.user_metadata?.kid_name || "Nome da criança",
+              parent_name: user.user_metadata?.parent_name || "Nome do Responsável",
+              parent_pin: user.user_metadata?.parent_pin || "1234",
+              avatar_kid: user.user_metadata?.avatar_kid || "avatar1",
+              avatar_parent: user.user_metadata?.avatar_parent || "parent1",
+              is_admin: metadataIsAdmin,
+            };
+            const { data: created } = await supabase
+              .from("profiles")
+              .upsert(autoProfile)
+              .select()
+              .maybeSingle();
+            if (created) profileData = created;
+          } catch {
+            // ok
+          }
+        }
+
+        const isAdmin = Boolean(profileData?.is_admin || metadataIsAdmin);
 
         if (profileData) {
           profile = {
@@ -355,6 +470,7 @@ export async function getSavedSession() {
             parentPin: profileData.parent_pin || profile.parentPin,
             avatarKid: profileData.avatar_kid || profile.avatarKid,
             avatarParent: profileData.avatar_parent || profile.avatarParent,
+            isAdmin,
           };
 
           const isDefaultKid = !profileData.kid_name || profileData.kid_name === "Nome da criança";
@@ -369,30 +485,24 @@ export async function getSavedSession() {
         } else {
           // Sem perfil no banco
           needsProfileSetup = true;
+          profile.isAdmin = isAdmin;
         }
       } catch {
         needsProfileSetup = true;
       }
 
-      return { user, profile, needsProfileSetup };
+      const enrichedUser = {
+        ...user,
+        isAdmin: profile.isAdmin,
+      };
+
+      return { user: enrichedUser, profile, needsProfileSetup };
     }
   }
 
+  // Remove qualquer resquício de mock user no localStorage para garantir que apenas o Supabase autentique
   if (typeof window !== "undefined") {
-    const stored = localStorage.getItem(STORAGE_USER_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      const isDefaultKid = !parsed.profile?.kidName || parsed.profile.kidName === "Nome da criança";
-      const isDefaultParent =
-        !parsed.profile?.parentName ||
-        parsed.profile.parentName === "Nome do Responsável" ||
-        parsed.profile.parentName === "Responsável";
-      return {
-        user: parsed.user,
-        profile: parsed.profile,
-        needsProfileSetup: isDefaultKid || isDefaultParent,
-      };
-    }
+    localStorage.removeItem(STORAGE_USER_KEY);
   }
 
   return null;
@@ -619,5 +729,26 @@ export async function getCustomPhrases() {
       return [];
     }
   }
+  return [];
+}
+
+// Buscar todos os usuários cadastrados (apenas para administrador)
+export async function getAllProfiles() {
+  if (isSupabaseConfigured() && supabase) {
+    const { data, error } = await supabase.rpc("get_all_profiles");
+    if (error) {
+      console.error("Erro ao buscar usuários (admin):", error);
+      throw error;
+    }
+    return (data || []).map((p) => ({
+      id: p.id,
+      email: p.email,
+      kidName: p.kid_name || "Nome da criança",
+      parentName: p.parent_name || "Nome do Responsável",
+      isAdmin: Boolean(p.is_admin),
+      createdAt: p.created_at,
+    }));
+  }
+
   return [];
 }

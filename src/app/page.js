@@ -8,9 +8,10 @@ import SideMenu from "@/components/SideMenu";
 import PasswordModal from "@/components/PasswordModal";
 import ParentsArea from "@/components/ParentsArea";
 import ConfigModal from "@/components/ConfigModal";
+import AdminArea from "@/components/AdminArea";
 
 export default function Home() {
-  const { user, loading, needsProfileSetup } = useAuth();
+  const { user, profile, logout, loading, needsProfileSetup } = useAuth();
 
   // Current view when authenticated: 'kids' (Tela 2) or 'parents' (Tela 4)
   const [currentView, setCurrentView] = useState("kids");
@@ -63,7 +64,13 @@ export default function Home() {
     return <LandingPage />;
   }
 
-  // If logged in:
+  // If logged in as admin -> direct to Admin Area
+  const isAdmin = Boolean(profile?.isAdmin || user?.isAdmin);
+  if (isAdmin) {
+    return <AdminArea onLogout={logout} />;
+  }
+
+  // If logged in as regular user:
   return (
     <>
       {currentView === "kids" ? (

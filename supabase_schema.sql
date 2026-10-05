@@ -12,9 +12,13 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   parent_pin TEXT,
   avatar_kid TEXT DEFAULT 'avatar1',
   avatar_parent TEXT DEFAULT 'parent1',
+  is_admin BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Garantir coluna is_admin caso a tabela já exista
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;
 
 -- Habilitar Row Level Security (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -165,3 +169,43 @@ DROP POLICY IF EXISTS "Arquivos públicos do bucket ecokids" ON storage.objects;
 CREATE POLICY "Arquivos públicos do bucket ecokids"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'ecokids');
+
+
+-- ===================================================
+-- 5. Função de Acesso de Administrador (RPC)
+-- ===================================================
+-- Retorna todos os usuários/perfis apenas se o chamador for administrador
+CREATE OR REPLACE FUNCTION public.get_all_profiles()
+RETURNS SETOF public.profiles
+LANGUAGE plpgsql
+SECURITY DEFINER SET search_path = public
+AS $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true) THEN
+    RETURN QUERY SELECT * FROM public.profiles ORDER BY created_at DESC;
+  ELSE
+    RAISE EXCEPTION 'Acesso Negado: Usuário não é administrador.';
+  END IF;
+END;
+$$;
+
+-- ===================================================
+-- 6. Função para Verificar se Usuário/Email Existe (RPC)
+-- ===================================================
+-- Permite verificar se o e-mail informado já possui cadastro no Supabase,
+-- possibilitando informar claramente na tela de login que o usuário não existe.
+CREATE OR REPLACE FUNCTION public.check_user_exists(email_input TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER SET search_path = public
+AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM auth.users 
+    WHERE LOWER(email) = LOWER(TRIM(email_input))
+  );
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.check_user_exists(TEXT) TO anon, authenticated, service_role;
+

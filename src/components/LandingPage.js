@@ -24,6 +24,7 @@ export default function LandingPage() {
   const [authMode, setAuthMode] = useState("login"); // 'login' or 'register'
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   // Form fields
   const [email, setEmail] = useState("");
@@ -35,30 +36,41 @@ export default function LandingPage() {
   const handleOpenAuth = (mode = "login") => {
     setAuthMode(mode);
     setErrorMsg("");
+    setSuccessMsg("");
     setAuthModalOpen(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg("");
+    setSuccessMsg("");
     setLoading(true);
 
     try {
       if (authMode === "login") {
         await login(email, password);
+        setAuthModalOpen(false);
       } else {
         if (!email || !password) {
           throw new Error("Por favor preencha email e senha.");
         }
-        await register({
+        const res = await register({
           email,
           password,
           kidName: kidName || "Nome da criança",
           parentName: parentName || "Nome do Responsável",
           pin: pin || password,
         });
+
+        if (res.session || res.user?.confirmed_at) {
+          setAuthModalOpen(false);
+        } else {
+          setSuccessMsg(
+            "Conta criada com sucesso no Supabase! Verifique seu e-mail para confirmar a conta antes de entrar (ou faça login se o seu projeto Supabase já permite acesso direto sem confirmação)."
+          );
+          setAuthMode("login");
+        }
       }
-      setAuthModalOpen(false);
     } catch (err) {
       setErrorMsg(err.message || "Erro ao autenticar. Tente novamente.");
     } finally {
@@ -600,15 +612,15 @@ export default function LandingPage() {
             {/* Supabase status badge */}
             <div
               style={{
-                backgroundColor: isConfigured ? "#ECFDF5" : "#EFF6FF",
-                border: isConfigured ? "1px solid #A7F3D0" : "1px solid #BFDBFE",
+                backgroundColor: isConfigured ? "#ECFDF5" : "#FEF2F2",
+                border: isConfigured ? "1px solid #A7F3D0" : "1px solid #FECACA",
                 borderRadius: "10px",
                 padding: "8px 12px",
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
                 fontSize: "12px",
-                color: isConfigured ? "#065F46" : "#1E40AF",
+                color: isConfigured ? "#065F46" : "#991B1B",
                 marginBottom: "20px",
                 fontWeight: "600",
               }}
@@ -616,8 +628,8 @@ export default function LandingPage() {
               <Info size={16} />
               <span>
                 {isConfigured
-                  ? "Conectado ao Supabase com autenticação ativa"
-                  : "Modo demonstração com suporte completo e salvamento local"}
+                  ? "Conectado ao Supabase - Autenticação segura ativa"
+                  : "Atenção: Supabase não configurado. Verifique as chaves no arquivo .env"}
               </span>
             </div>
 
@@ -636,6 +648,7 @@ export default function LandingPage() {
                 onClick={() => {
                   setAuthMode("login");
                   setErrorMsg("");
+                  setSuccessMsg("");
                 }}
                 style={{
                   flex: 1,
@@ -656,6 +669,7 @@ export default function LandingPage() {
                 onClick={() => {
                   setAuthMode("register");
                   setErrorMsg("");
+                  setSuccessMsg("");
                 }}
                 style={{
                   flex: 1,
@@ -674,6 +688,25 @@ export default function LandingPage() {
               </button>
             </div>
 
+            {/* Success Message */}
+            {successMsg && (
+              <div
+                style={{
+                  backgroundColor: "#F0FDF4",
+                  color: "#166534",
+                  border: "1px solid #BBF7D0",
+                  borderRadius: "10px",
+                  padding: "12px 14px",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  marginBottom: "16px",
+                  lineHeight: "1.4",
+                }}
+              >
+                {successMsg}
+              </div>
+            )}
+
             {/* Error Message */}
             {errorMsg && (
               <div
@@ -682,13 +715,54 @@ export default function LandingPage() {
                   color: "#B91C1C",
                   border: "1px solid #FECACA",
                   borderRadius: "10px",
-                  padding: "10px 14px",
+                  padding: "12px 14px",
                   fontSize: "13px",
                   fontWeight: "600",
                   marginBottom: "16px",
+                  lineHeight: "1.4",
                 }}
               >
-                {errorMsg}
+                <div
+                  style={{
+                    marginBottom:
+                      (errorMsg.includes("Cadastrar") ||
+                        errorMsg.includes("cadastro") ||
+                        errorMsg.includes("não encontrado")) &&
+                      authMode === "login"
+                        ? "10px"
+                        : "0",
+                  }}
+                >
+                  {errorMsg}
+                </div>
+                {(errorMsg.includes("Cadastrar") ||
+                  errorMsg.includes("cadastro") ||
+                  errorMsg.includes("não encontrado")) &&
+                  authMode === "login" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode("register");
+                        setErrorMsg("");
+                      }}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        color: "#166534",
+                        backgroundColor: "#DCFCE7",
+                        padding: "8px 14px",
+                        borderRadius: "8px",
+                        fontWeight: "700",
+                        fontSize: "13px",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <span>Criar meu cadastro agora</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  )}
               </div>
             )}
 
@@ -848,32 +922,6 @@ export default function LandingPage() {
                   : "Criar Conta e Acessar"}
                 {!loading && <ArrowRight size={18} />}
               </button>
-
-              {/* Quick test account helper */}
-              <div
-                style={{
-                  marginTop: "16px",
-                  textAlign: "center",
-                  fontSize: "13px",
-                  color: "#64748B",
-                }}
-              >
-                <span>Dica rápida: </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmail("pais@ecokids.com");
-                    setPassword("123456");
-                  }}
-                  style={{
-                    color: "#2DB34A",
-                    fontWeight: "700",
-                    textDecoration: "underline",
-                  }}
-                >
-                  Preencher dados de teste
-                </button>
-              </div>
             </form>
           </div>
         </div>
