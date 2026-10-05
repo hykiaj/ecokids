@@ -32,14 +32,14 @@ export default function Home() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#F7FAF8",
+          backgroundColor: "var(--bg-creamy)",
         }}
       >
         <div
           style={{
             width: "48px",
             height: "48px",
-            border: "4px solid #DCFCE7",
+            border: "4px solid rgba(45, 179, 74, 0.2)",
             borderTopColor: "#2DB34A",
             borderRadius: "50%",
             animation: "spin 1s linear infinite",

@@ -2,10 +2,12 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { X, Lock, AlertCircle } from "lucide-react";
 
 export default function PasswordModal({ isOpen, onClose, onSuccess }) {
   const { verifyParentPassword, profile } = useAuth();
+  const { isDark } = useTheme();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
@@ -50,15 +52,16 @@ export default function PasswordModal({ isOpen, onClose, onSuccess }) {
       <div
         className="animate-modal"
         style={{
-          backgroundColor: "#FFFFFF",
+          backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
           borderRadius: "24px",
           width: "100%",
           maxWidth: "400px",
           padding: "36px 32px 32px 32px",
-          boxShadow: "0 20px 40px -8px rgba(0, 0, 0, 0.2)",
-          border: "1px solid #E2E8F0",
+          boxShadow: isDark ? "0 20px 40px -8px rgba(0, 0, 0, 0.6)" : "0 20px 40px -8px rgba(0, 0, 0, 0.2)",
+          border: isDark ? "1px solid #334155" : "1px solid #E2E8F0",
           textAlign: "center",
           position: "relative",
+          transition: "background-color 0.25s ease, border-color 0.25s ease",
         }}
       >
         {/* Close icon */}
@@ -81,7 +84,7 @@ export default function PasswordModal({ isOpen, onClose, onSuccess }) {
           style={{
             fontSize: "17px",
             fontWeight: "700",
-            color: "#334155",
+            color: isDark ? "#F8FAFC" : "#334155",
             marginBottom: "24px",
           }}
         >
@@ -91,8 +94,9 @@ export default function PasswordModal({ isOpen, onClose, onSuccess }) {
         {error && (
           <div
             style={{
-              backgroundColor: "#FEF2F2",
-              color: "#DC2626",
+              backgroundColor: isDark ? "#450A0A40" : "#FEF2F2",
+              color: isDark ? "#FCA5A5" : "#DC2626",
+              border: isDark ? "1px solid #991B1B" : "none",
               borderRadius: "10px",
               padding: "8px 12px",
               fontSize: "13px",
@@ -122,15 +126,15 @@ export default function PasswordModal({ isOpen, onClose, onSuccess }) {
                 width: "100%",
                 padding: "12px 16px",
                 borderRadius: "12px",
-                border: "1.5px solid #CBD5E1",
+                border: isDark ? "1.5px solid #475569" : "1.5px solid #CBD5E1",
                 fontSize: "15px",
                 outline: "none",
                 textAlign: "left",
-                color: "#1E293B",
-                backgroundColor: "#FFFFFF",
+                color: isDark ? "#F8FAFC" : "#1E293B",
+                backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
               }}
               onFocus={(e) => (e.target.style.borderColor = "#2DB34A")}
-              onBlur={(e) => (e.target.style.borderColor = "#CBD5E1")}
+              onBlur={(e) => (e.target.style.borderColor = isDark ? "#475569" : "#CBD5E1")}
             />
           </div>
 
@@ -158,7 +162,7 @@ export default function PasswordModal({ isOpen, onClose, onSuccess }) {
         <p
           style={{
             fontSize: "12px",
-            color: "#94A3B8",
+            color: isDark ? "#94A3B8" : "#94A3B8",
             marginTop: "16px",
           }}
         >

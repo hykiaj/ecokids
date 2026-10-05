@@ -3,7 +3,9 @@
 import React, { useState } from "react";
 import { KidAvatar } from "./Avatars";
 import AvatarModal from "./AvatarModal";
+import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import {
   X,
   User,
@@ -20,7 +22,8 @@ export default function SideMenu({
   onRequestParentsArea,
   onOpenSettings,
 }) {
-  const { profile, logout, updateProfileData } = useAuth();
+  const { profile, logout } = useAuth();
+  const { isDark } = useTheme();
   const [avatarModalOpen, setAvatarModalOpen] = useState(false);
 
   if (!isOpen) return null;
@@ -30,7 +33,7 @@ export default function SideMenu({
       style={{
         position: "fixed",
         inset: 0,
-        backgroundColor: "rgba(15, 23, 42, 0.25)",
+        backgroundColor: "rgba(15, 23, 42, 0.35)",
         backdropFilter: "blur(2px)",
         display: "flex",
         justifyContent: "flex-end",
@@ -43,14 +46,15 @@ export default function SideMenu({
       <aside
         className="animate-drawer"
         style={{
-          width: "280px",
+          width: "290px",
           height: "100%",
-          backgroundColor: "#FFFFFF",
-          boxShadow: "-8px 0 24px rgba(0, 0, 0, 0.08)",
+          backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
+          boxShadow: "-8px 0 24px rgba(0, 0, 0, 0.15)",
           display: "flex",
           flexDirection: "column",
           padding: "36px 24px 32px 24px",
-          borderLeft: "1px solid #E2E8F0",
+          borderLeft: isDark ? "1px solid #334155" : "1px solid #E2E8F0",
+          transition: "background-color 0.25s ease, border-color 0.25s ease",
         }}
       >
         {/* Close Button on top */}
@@ -60,7 +64,7 @@ export default function SideMenu({
             style={{
               padding: "6px",
               borderRadius: "8px",
-              color: "#94A3B8",
+              color: isDark ? "#94A3B8" : "#94A3B8",
             }}
           >
             <X size={22} />
@@ -74,9 +78,9 @@ export default function SideMenu({
             flexDirection: "column",
             alignItems: "center",
             textAlign: "center",
-            paddingBottom: "28px",
-            borderBottom: "1px solid #F1F5F9",
-            marginBottom: "24px",
+            paddingBottom: "24px",
+            borderBottom: isDark ? "1px solid #334155" : "1px solid #F1F5F9",
+            marginBottom: "20px",
           }}
         >
           {/* Large Kid Avatar */}
@@ -88,7 +92,7 @@ export default function SideMenu({
             style={{
               fontSize: "17px",
               fontWeight: "800",
-              color: "#1E293B",
+              color: isDark ? "#F8FAFC" : "#1E293B",
               marginBottom: "4px",
             }}
           >
@@ -98,15 +102,15 @@ export default function SideMenu({
             style={{
               fontSize: "13px",
               fontWeight: "600",
-              color: "#64748B",
+              color: isDark ? "#94A3B8" : "#64748B",
             }}
           >
             {profile.parentName || "Responsável"}
           </p>
         </div>
 
-        {/* Navigation Items matching Tela3.jpeg */}
-        <nav style={{ display: "flex", flexDirection: "column", gap: "10px", flex: 1 }}>
+        {/* Navigation Items */}
+        <nav style={{ display: "flex", flexDirection: "column", gap: "8px", flex: 1, overflowY: "auto" }}>
           <button
             onClick={() => setAvatarModalOpen(true)}
             style={{
@@ -115,16 +119,16 @@ export default function SideMenu({
               borderRadius: "12px",
               fontSize: "15px",
               fontWeight: "700",
-              color: "#334155",
+              color: isDark ? "#E2E8F0" : "#334155",
               display: "flex",
               alignItems: "center",
               gap: "12px",
               transition: "background 0.15s ease",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#F8FAFC")}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = isDark ? "#334155" : "#F8FAFC")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
           >
-            <Camera size={18} color="#64748B" />
+            <Camera size={18} color={isDark ? "#94A3B8" : "#64748B"} />
             <span>Alterar avatar</span>
           </button>
 
@@ -140,13 +144,13 @@ export default function SideMenu({
               borderRadius: "12px",
               fontSize: "15px",
               fontWeight: "700",
-              color: "#334155",
+              color: isDark ? "#E2E8F0" : "#334155",
               display: "flex",
               alignItems: "center",
               gap: "12px",
               transition: "background 0.15s ease",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#F0FDF4")}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = isDark ? "#14532D30" : "#F0FDF4")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
           >
             <Shield size={18} color="#2DB34A" />
@@ -164,22 +168,27 @@ export default function SideMenu({
               borderRadius: "12px",
               fontSize: "15px",
               fontWeight: "700",
-              color: "#334155",
+              color: isDark ? "#E2E8F0" : "#334155",
               display: "flex",
               alignItems: "center",
               gap: "12px",
               transition: "background 0.15s ease",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#F8FAFC")}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = isDark ? "#334155" : "#F8FAFC")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
           >
-            <Settings size={18} color="#64748B" />
+            <Settings size={18} color={isDark ? "#94A3B8" : "#64748B"} />
             <span>Configurações</span>
           </button>
+
+          {/* Alternância de Modo Claro e Escuro */}
+          <div style={{ marginTop: "4px" }}>
+            <ThemeToggle variant="menu-item" />
+          </div>
         </nav>
 
         {/* Bottom Sair button in red/coral */}
-        <div style={{ paddingTop: "16px", borderTop: "1px solid #F1F5F9" }}>
+        <div style={{ paddingTop: "16px", borderTop: isDark ? "1px solid #334155" : "1px solid #F1F5F9" }}>
           <button
             onClick={() => {
               logout();
@@ -198,7 +207,7 @@ export default function SideMenu({
               gap: "8px",
               transition: "background 0.15s ease",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#FEF2F2")}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = isDark ? "#450A0A30" : "#FEF2F2")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
           >
             <LogOut size={18} />

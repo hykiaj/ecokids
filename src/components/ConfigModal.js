@@ -2,10 +2,13 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { X, Settings, Database, Check, UserPlus, AlertCircle, KeyRound } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
+import ThemeToggle from "./ThemeToggle";
+import { X, Settings, Database, Check, UserPlus, AlertCircle, KeyRound, Palette } from "lucide-react";
 
 function ConfigModalContent({ onClose }) {
   const { user, profile, updateProfileData, isConfigured, needsProfileSetup, resetPassword } = useAuth();
+  const { isDark } = useTheme();
 
   const [kidName, setKidName] = useState(
     profile?.kidName && profile.kidName !== "Nome da criança" ? profile.kidName : ""
@@ -103,16 +106,17 @@ function ConfigModalContent({ onClose }) {
       <div
         className="animate-modal"
         style={{
-          backgroundColor: "#FFFFFF",
+          backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
           borderRadius: "24px",
           width: "100%",
           maxWidth: "480px",
           padding: "32px",
-          boxShadow: "0 20px 40px -8px rgba(0, 0, 0, 0.2)",
-          border: "1px solid #E2E8F0",
+          boxShadow: isDark ? "0 20px 40px -8px rgba(0, 0, 0, 0.6)" : "0 20px 40px -8px rgba(0, 0, 0, 0.2)",
+          border: isDark ? "1px solid #334155" : "1px solid #E2E8F0",
           position: "relative",
           maxHeight: "90vh",
           overflowY: "auto",
+          transition: "background-color 0.25s ease, border-color 0.25s ease",
         }}
       >
         <button
@@ -121,7 +125,7 @@ function ConfigModalContent({ onClose }) {
             position: "absolute",
             top: "20px",
             right: "20px",
-            color: "#94A3B8",
+            color: isDark ? "#94A3B8" : "#94A3B8",
             padding: "4px",
             borderRadius: "6px",
           }}
@@ -135,20 +139,22 @@ function ConfigModalContent({ onClose }) {
             style={{
               padding: "10px",
               borderRadius: "12px",
-              backgroundColor: needsProfileSetup ? "#FEF3C7" : "#F0FDF4",
+              backgroundColor: needsProfileSetup
+                ? (isDark ? "#78350F30" : "#FEF3C7")
+                : (isDark ? "#14532D30" : "#F0FDF4"),
               color: needsProfileSetup ? "#D97706" : "#16A34A",
             }}
           >
             {needsProfileSetup ? <UserPlus size={22} /> : <Settings size={22} />}
           </div>
           <div>
-            <h3 style={{ fontSize: "18px", fontWeight: "800", color: "#1E293B" }}>
+            <h3 style={{ fontSize: "18px", fontWeight: "800", color: isDark ? "#F8FAFC" : "#1E293B" }}>
               {needsProfileSetup ? "Vincular Perfil no Banco" : "Configurações do Eco Kids"}
             </h3>
-            <p style={{ fontSize: "13px", color: "#64748B" }}>
+            <p style={{ fontSize: "13px", color: isDark ? "#94A3B8" : "#64748B" }}>
               {needsProfileSetup
                 ? "Complete os nomes para salvar seu usuário no banco de dados"
-                : "Gerencie perfis e conexão com o banco de dados"}
+                : "Gerencie perfis, aparência e conexão"}
             </p>
           </div>
         </div>
@@ -157,29 +163,48 @@ function ConfigModalContent({ onClose }) {
         {needsProfileSetup && (
           <div
             style={{
-              backgroundColor: "#FFFBEB",
-              border: "1.5px solid #FDE68A",
+              backgroundColor: isDark ? "#451A0340" : "#FFFBEB",
+              border: isDark ? "1.5px solid #92400E" : "1.5px solid #FDE68A",
               borderRadius: "14px",
               padding: "14px 16px",
               marginBottom: "18px",
               fontSize: "13px",
-              color: "#92400E",
+              color: isDark ? "#FCD34D" : "#92400E",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "700" }}>
               <span>👋 Olá! Seu email ainda não possui perfil vinculado</span>
             </div>
-            <p style={{ marginTop: "4px", fontSize: "12px", lineHeight: "1.4", color: "#B45309" }}>
+            <p style={{ marginTop: "4px", fontSize: "12px", lineHeight: "1.4", color: isDark ? "#FDE68A" : "#B45309" }}>
               Para começar a usar as pranchas e salvar suas preferências, digite o nome da criança e do responsável abaixo. Os dados serão salvos no banco de dados automaticamente.
             </p>
           </div>
         )}
 
+        {/* Seção de Aparência: Modo Claro e Modo Escuro */}
+        <div
+          style={{
+            backgroundColor: isDark ? "#0F172A" : "#F8FAFC",
+            border: isDark ? "1.5px solid #334155" : "1.5px solid #E2E8F0",
+            borderRadius: "14px",
+            padding: "14px 16px",
+            marginBottom: "18px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+            <Palette size={16} color={isDark ? "#4ADE80" : "#16A34A"} />
+            <strong style={{ fontSize: "13px", color: isDark ? "#F8FAFC" : "#1E293B" }}>
+              Aparência do Aplicativo
+            </strong>
+          </div>
+          <ThemeToggle variant="selector" />
+        </div>
+
         {/* Supabase status block */}
         <div
           style={{
-            backgroundColor: isConfigured ? "#ECFDF5" : "#F8FAFC",
-            border: isConfigured ? "1.5px solid #A7F3D0" : "1.5px solid #E2E8F0",
+            backgroundColor: isDark ? "#0F172A" : (isConfigured ? "#ECFDF5" : "#F8FAFC"),
+            border: isDark ? "1.5px solid #334155" : (isConfigured ? "1.5px solid #A7F3D0" : "1.5px solid #E2E8F0"),
             borderRadius: "14px",
             padding: "14px 16px",
             marginBottom: "20px",
@@ -187,12 +212,12 @@ function ConfigModalContent({ onClose }) {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-            <Database size={16} color={isConfigured ? "#059669" : "#64748B"} />
-            <strong style={{ color: isConfigured ? "#065F46" : "#334155" }}>
+            <Database size={16} color={isConfigured ? "#059669" : (isDark ? "#94A3B8" : "#64748B")} />
+            <strong style={{ color: isConfigured ? (isDark ? "#4ADE80" : "#065F46") : (isDark ? "#E2E8F0" : "#334155") }}>
               Status do Banco: {isConfigured ? "Supabase Conectado" : "Modo Local / Demo"}
             </strong>
           </div>
-          <p style={{ color: "#64748B", fontSize: "12px", lineHeight: "1.4" }}>
+          <p style={{ color: isDark ? "#94A3B8" : "#64748B", fontSize: "12px", lineHeight: "1.4" }}>
             {isConfigured
               ? "As alterações feitas aqui serão sincronizadas diretamente na tabela profiles."
               : "Modo demonstração: os dados serão gravados no armazenamento local."}
@@ -202,9 +227,9 @@ function ConfigModalContent({ onClose }) {
         {savedNotice && (
           <div
             style={{
-              backgroundColor: "#ECFDF5",
-              color: "#065F46",
-              border: "1px solid #A7F3D0",
+              backgroundColor: isDark ? "#064E3B40" : "#ECFDF5",
+              color: isDark ? "#6EE7B7" : "#065F46",
+              border: isDark ? "1px solid #065F46" : "1px solid #A7F3D0",
               borderRadius: "10px",
               padding: "10px 14px",
               fontSize: "13px",
@@ -223,9 +248,9 @@ function ConfigModalContent({ onClose }) {
         {errorMsg && (
           <div
             style={{
-              backgroundColor: "#FEF2F2",
-              color: "#991B1B",
-              border: "1px solid #FECACA",
+              backgroundColor: isDark ? "#450A0A40" : "#FEF2F2",
+              color: isDark ? "#FCA5A5" : "#991B1B",
+              border: isDark ? "1px solid #991B1B" : "1px solid #FECACA",
               borderRadius: "10px",
               padding: "10px 14px",
               fontSize: "13px",
@@ -248,7 +273,7 @@ function ConfigModalContent({ onClose }) {
                 display: "block",
                 fontSize: "13px",
                 fontWeight: "700",
-                color: "#334155",
+                color: isDark ? "#E2E8F0" : "#334155",
                 marginBottom: "6px",
               }}
             >
@@ -264,7 +289,9 @@ function ConfigModalContent({ onClose }) {
                 width: "100%",
                 padding: "10px 14px",
                 borderRadius: "10px",
-                border: "1.5px solid #CBD5E1",
+                border: isDark ? "1.5px solid #475569" : "1.5px solid #CBD5E1",
+                backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
+                color: isDark ? "#F8FAFC" : "#1E293B",
                 fontSize: "14px",
                 outline: "none",
               }}
@@ -277,7 +304,7 @@ function ConfigModalContent({ onClose }) {
                 display: "block",
                 fontSize: "13px",
                 fontWeight: "700",
-                color: "#334155",
+                color: isDark ? "#E2E8F0" : "#334155",
                 marginBottom: "6px",
               }}
             >
@@ -293,7 +320,9 @@ function ConfigModalContent({ onClose }) {
                 width: "100%",
                 padding: "10px 14px",
                 borderRadius: "10px",
-                border: "1.5px solid #CBD5E1",
+                border: isDark ? "1.5px solid #475569" : "1.5px solid #CBD5E1",
+                backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
+                color: isDark ? "#F8FAFC" : "#1E293B",
                 fontSize: "14px",
                 outline: "none",
               }}
@@ -303,8 +332,8 @@ function ConfigModalContent({ onClose }) {
           {/* Seção de Redefinição de Senha via serviço nativo do Supabase */}
           <div
             style={{
-              backgroundColor: "#F8FAFC",
-              border: "1.5px solid #E2E8F0",
+              backgroundColor: isDark ? "#0F172A" : "#F8FAFC",
+              border: isDark ? "1.5px solid #334155" : "1.5px solid #E2E8F0",
               borderRadius: "14px",
               padding: "14px 16px",
               marginBottom: "22px",
@@ -321,12 +350,12 @@ function ConfigModalContent({ onClose }) {
             >
               <div style={{ flex: "1 1 200px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "3px" }}>
-                  <KeyRound size={15} color="#475569" />
-                  <strong style={{ fontSize: "13px", color: "#1E293B" }}>Redefinição de Senha</strong>
+                  <KeyRound size={15} color={isDark ? "#94A3B8" : "#475569"} />
+                  <strong style={{ fontSize: "13px", color: isDark ? "#F8FAFC" : "#1E293B" }}>Redefinição de Senha</strong>
                 </div>
-                <p style={{ fontSize: "12px", color: "#64748B", margin: 0, lineHeight: "1.4" }}>
+                <p style={{ fontSize: "12px", color: isDark ? "#94A3B8" : "#64748B", margin: 0, lineHeight: "1.4" }}>
                   Enviar link seguro para:{" "}
-                  <span style={{ fontWeight: "600", color: "#334155" }}>
+                  <span style={{ fontWeight: "600", color: isDark ? "#E2E8F0" : "#334155" }}>
                     {user?.email || profile?.email || "e-mail da conta"}
                   </span>
                 </p>
@@ -342,9 +371,9 @@ function ConfigModalContent({ onClose }) {
                   gap: "6px",
                   padding: "8px 14px",
                   borderRadius: "10px",
-                  backgroundColor: "#FFFFFF",
-                  border: "1.5px solid #CBD5E1",
-                  color: "#334155",
+                  backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
+                  border: isDark ? "1.5px solid #475569" : "1.5px solid #CBD5E1",
+                  color: isDark ? "#F8FAFC" : "#334155",
                   fontSize: "13px",
                   fontWeight: "700",
                   cursor: isResetting ? "not-allowed" : "pointer",
@@ -360,8 +389,8 @@ function ConfigModalContent({ onClose }) {
                 }}
                 onMouseLeave={(e) => {
                   if (!isResetting) {
-                    e.currentTarget.style.borderColor = "#CBD5E1";
-                    e.currentTarget.style.color = "#334155";
+                    e.currentTarget.style.borderColor = isDark ? "#475569" : "#CBD5E1";
+                    e.currentTarget.style.color = isDark ? "#F8FAFC" : "#334155";
                   }
                 }}
               >
@@ -374,9 +403,9 @@ function ConfigModalContent({ onClose }) {
               <div
                 style={{
                   marginTop: "12px",
-                  backgroundColor: "#ECFDF5",
-                  color: "#065F46",
-                  border: "1px solid #A7F3D0",
+                  backgroundColor: isDark ? "#064E3B40" : "#ECFDF5",
+                  color: isDark ? "#6EE7B7" : "#065F46",
+                  border: isDark ? "1px solid #065F46" : "1px solid #A7F3D0",
                   borderRadius: "8px",
                   padding: "8px 12px",
                   fontSize: "12px",
@@ -395,9 +424,9 @@ function ConfigModalContent({ onClose }) {
               <div
                 style={{
                   marginTop: "12px",
-                  backgroundColor: "#FEF2F2",
-                  color: "#991B1B",
-                  border: "1px solid #FECACA",
+                  backgroundColor: isDark ? "#450A0A40" : "#FEF2F2",
+                  color: isDark ? "#FCA5A5" : "#991B1B",
+                  border: isDark ? "1px solid #991B1B" : "1px solid #FECACA",
                   borderRadius: "8px",
                   padding: "8px 12px",
                   fontSize: "12px",

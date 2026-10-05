@@ -3,7 +3,9 @@
 import React, { useState } from "react";
 import Logo from "./Logo";
 import { KidAvatar } from "./Avatars";
+import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { resolveCustomImageUrl } from "@/lib/supabase";
 import {
   Menu,
@@ -394,6 +396,7 @@ function CornerDoodles({ color = "#C4B5FD" }) {
 
 export default function KidsHome({ onOpenMenu }) {
   const { profile, recordBoardClick, recordPhraseClick, customPhrases } = useAuth();
+  const { isDark } = useTheme();
   const [selectedBoard, setSelectedBoard] = useState(null);
   const [speakingText, setSpeakingText] = useState("");
 
@@ -683,7 +686,7 @@ export default function KidsHome({ onOpenMenu }) {
       <div
         style={{
           minHeight: "100vh",
-          backgroundColor: selectedBoard.bgScreen || selectedBoard.bgTop,
+          backgroundColor: isDark ? "#0B1320" : (selectedBoard.bgScreen || selectedBoard.bgTop),
           padding: "20px 24px 36px 24px",
           display: "flex",
           flexDirection: "column",
@@ -691,6 +694,7 @@ export default function KidsHome({ onOpenMenu }) {
           justifyContent: "center",
           position: "relative",
           overflow: "hidden",
+          transition: "background-color 0.25s ease",
         }}
       >
         {/* Logo Eco Kids no canto superior esquerdo exatamente como na imagem */}
@@ -715,7 +719,7 @@ export default function KidsHome({ onOpenMenu }) {
             height: "360px",
             borderRadius: "45% 55% 40% 60% / 50% 40% 60% 50%",
             backgroundColor: selectedBoard.borderColor,
-            opacity: 0.6,
+            opacity: isDark ? 0.25 : 0.6,
             zIndex: 0,
             pointerEvents: "none",
           }}
@@ -731,7 +735,7 @@ export default function KidsHome({ onOpenMenu }) {
             height: "70px",
             backgroundImage: `radial-gradient(${selectedBoard.themeColor} 2.5px, transparent 2.5px)`,
             backgroundSize: "16px 16px",
-            opacity: 0.6,
+            opacity: isDark ? 0.35 : 0.6,
             zIndex: 0,
             pointerEvents: "none",
           }}
@@ -747,7 +751,7 @@ export default function KidsHome({ onOpenMenu }) {
             height: "320px",
             borderRadius: "60% 40% 55% 45% / 45% 60% 40% 55%",
             backgroundColor: selectedBoard.borderColor,
-            opacity: 0.55,
+            opacity: isDark ? 0.25 : 0.55,
             zIndex: 0,
             pointerEvents: "none",
           }}
@@ -763,7 +767,7 @@ export default function KidsHome({ onOpenMenu }) {
             height: "120px",
             backgroundImage: `radial-gradient(${selectedBoard.themeColor} 2.5px, transparent 2.5px)`,
             backgroundSize: "16px 16px",
-            opacity: 0.55,
+            opacity: isDark ? 0.35 : 0.55,
             zIndex: 0,
             pointerEvents: "none",
           }}
@@ -775,14 +779,17 @@ export default function KidsHome({ onOpenMenu }) {
           style={{
             width: "100%",
             maxWidth: "1060px",
-            backgroundColor: "#FFFFFF",
+            backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
             borderRadius: "32px",
-            boxShadow: `0 16px 40px rgba(0, 0, 0, 0.05), 0 4px 16px ${selectedBoard.themeColor}12`,
-            border: `2px solid ${selectedBoard.borderColor}90`,
+            boxShadow: isDark
+              ? "0 16px 48px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3)"
+              : `0 16px 40px rgba(0, 0, 0, 0.05), 0 4px 16px ${selectedBoard.themeColor}12`,
+            border: isDark ? "2px solid #334155" : `2px solid ${selectedBoard.borderColor}90`,
             padding: "24px 32px 32px 32px",
             position: "relative",
             zIndex: 1,
             marginTop: "16px",
+            transition: "background-color 0.25s ease, border-color 0.25s ease",
           }}
         >
           {/* Cabeçalho da Prancha: Botão Voltar, Título Centralizado e Menu */}
@@ -803,8 +810,8 @@ export default function KidsHome({ onOpenMenu }) {
                 width: "44px",
                 height: "44px",
                 borderRadius: "14px",
-                backgroundColor: selectedBoard.bgTop,
-                border: `1.5px solid ${selectedBoard.borderColor}`,
+                backgroundColor: isDark ? "#0F172A" : selectedBoard.bgTop,
+                border: isDark ? "1.5px solid #334155" : `1.5px solid ${selectedBoard.borderColor}`,
                 color: selectedBoard.themeColor,
                 display: "flex",
                 alignItems: "center",
@@ -818,7 +825,7 @@ export default function KidsHome({ onOpenMenu }) {
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "scale(1)";
-                e.currentTarget.style.borderColor = selectedBoard.borderColor;
+                e.currentTarget.style.borderColor = isDark ? "#334155" : selectedBoard.borderColor;
               }}
             >
               <ArrowLeft size={22} strokeWidth={2.6} />
@@ -829,7 +836,7 @@ export default function KidsHome({ onOpenMenu }) {
               style={{
                 fontSize: "36px",
                 fontWeight: "900",
-                color: selectedBoard.deepColor || selectedBoard.themeColor,
+                color: isDark ? "#F8FAFC" : (selectedBoard.deepColor || selectedBoard.themeColor),
                 letterSpacing: "-0.5px",
                 margin: 0,
                 textAlign: "center",
@@ -838,40 +845,44 @@ export default function KidsHome({ onOpenMenu }) {
               {selectedBoard.title}
             </h1>
 
-            {/* Botão de Menu Hambúrguer */}
-            <button
-              onClick={onOpenMenu}
-              aria-label="Abrir menu"
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "14px",
-                backgroundColor: "transparent",
-                color: selectedBoard.themeColor,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = selectedBoard.bgTop;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-              }}
-            >
-              <Menu size={30} strokeWidth={2.4} />
-            </button>
+            {/* Controles da Direita: Alternador de Tema e Menu Hambúrguer */}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <ThemeToggle />
+              <button
+                onClick={onOpenMenu}
+                aria-label="Abrir menu"
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "14px",
+                  backgroundColor: isDark ? "#0F172A" : "transparent",
+                  border: isDark ? "1.5px solid #334155" : "none",
+                  color: selectedBoard.themeColor,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = isDark ? "#334155" : selectedBoard.bgTop;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = isDark ? "#0F172A" : "transparent";
+                }}
+              >
+                <Menu size={30} strokeWidth={2.4} />
+              </button>
+            </div>
           </header>
 
           {/* Banner de áudio falando em tempo real */}
           {speakingText && (
             <div
               style={{
-                backgroundColor: selectedBoard.bgTop,
+                backgroundColor: isDark ? "#14532D40" : selectedBoard.bgTop,
                 border: `1.5px solid ${selectedBoard.borderColor}`,
-                color: selectedBoard.deepColor || selectedBoard.themeColor,
+                color: isDark ? "#4ADE80" : (selectedBoard.deepColor || selectedBoard.themeColor),
                 padding: "10px 20px",
                 borderRadius: "14px",
                 marginBottom: "20px",
@@ -907,8 +918,10 @@ export default function KidsHome({ onOpenMenu }) {
                 onKeyDown={(e) => e.key === "Enter" && handlePhraseClick(phraseText, selectedBoard)}
                 style={{
                   borderRadius: "24px",
-                  border: `2px solid ${selectedBoard.borderColor}`,
-                  background: `linear-gradient(180deg, ${selectedBoard.bgTop} 0%, #FFFFFF 60%)`,
+                  border: isDark ? `2px solid ${selectedBoard.borderColor}70` : `2px solid ${selectedBoard.borderColor}`,
+                  background: isDark
+                    ? "#0F172A"
+                    : `linear-gradient(180deg, ${selectedBoard.bgTop} 0%, #FFFFFF 60%)`,
                   padding: "20px 14px 18px 14px",
                   display: "flex",
                   flexDirection: "column",
@@ -918,7 +931,7 @@ export default function KidsHome({ onOpenMenu }) {
                   position: "relative",
                   overflow: "hidden",
                   cursor: "pointer",
-                  boxShadow: "0 4px 14px rgba(0, 0, 0, 0.03)",
+                  boxShadow: isDark ? "0 4px 14px rgba(0, 0, 0, 0.3)" : "0 4px 14px rgba(0, 0, 0, 0.03)",
                 }}
               >
                 {/* Elementos decorativos nos cantos */}
@@ -930,7 +943,7 @@ export default function KidsHome({ onOpenMenu }) {
                     width: "92px",
                     height: "92px",
                     borderRadius: "50%",
-                    backgroundColor: "#FFFFFF",
+                    backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
                     border: `2px solid ${selectedBoard.borderColor}`,
                     display: "flex",
                     alignItems: "center",
@@ -948,7 +961,7 @@ export default function KidsHome({ onOpenMenu }) {
                   style={{
                     fontSize: "18px",
                     fontWeight: "800",
-                    color: selectedBoard.deepColor || "#1E293B",
+                    color: isDark ? "#F8FAFC" : (selectedBoard.deepColor || "#1E293B"),
                     textAlign: "center",
                     marginTop: "12px",
                     lineHeight: "1.25",
@@ -977,8 +990,10 @@ export default function KidsHome({ onOpenMenu }) {
                   onKeyDown={(e) => e.key === "Enter" && handlePhraseClick(phraseText, selectedBoard)}
                   style={{
                     borderRadius: "24px",
-                    border: `2px solid ${selectedBoard.borderColor}`,
-                    background: `linear-gradient(180deg, ${selectedBoard.bgTop} 0%, #FFFFFF 60%)`,
+                    border: isDark ? `2px solid ${selectedBoard.borderColor}70` : `2px solid ${selectedBoard.borderColor}`,
+                    background: isDark
+                      ? "#0F172A"
+                      : `linear-gradient(180deg, ${selectedBoard.bgTop} 0%, #FFFFFF 60%)`,
                     padding: "20px 14px 18px 14px",
                     display: "flex",
                     flexDirection: "column",
@@ -988,7 +1003,7 @@ export default function KidsHome({ onOpenMenu }) {
                     position: "relative",
                     overflow: "hidden",
                     cursor: "pointer",
-                    boxShadow: "0 4px 14px rgba(0, 0, 0, 0.03)",
+                    boxShadow: isDark ? "0 4px 14px rgba(0, 0, 0, 0.3)" : "0 4px 14px rgba(0, 0, 0, 0.03)",
                   }}
                 >
                   <CornerDoodles color={selectedBoard.borderColor} />
@@ -997,7 +1012,7 @@ export default function KidsHome({ onOpenMenu }) {
                       width: "92px",
                       height: "92px",
                       borderRadius: "50%",
-                      backgroundColor: "#FFFFFF",
+                      backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
                       border: `2px solid ${selectedBoard.borderColor}`,
                       display: "flex",
                       alignItems: "center",
@@ -1030,7 +1045,7 @@ export default function KidsHome({ onOpenMenu }) {
                     style={{
                       fontSize: "18px",
                       fontWeight: "800",
-                      color: selectedBoard.deepColor || "#1E293B",
+                      color: isDark ? "#F8FAFC" : (selectedBoard.deepColor || "#1E293B"),
                       textAlign: "center",
                       marginTop: "12px",
                       lineHeight: "1.25",
@@ -1054,7 +1069,7 @@ export default function KidsHome({ onOpenMenu }) {
               style={{
                 borderRadius: "24px",
                 border: `2px dashed ${selectedBoard.borderColor}`,
-                backgroundColor: `${selectedBoard.bgTop}60`,
+                backgroundColor: isDark ? "#0F172A60" : `${selectedBoard.bgTop}60`,
                 padding: "20px 14px 18px 14px",
                 display: "flex",
                 flexDirection: "column",
@@ -1074,7 +1089,7 @@ export default function KidsHome({ onOpenMenu }) {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
                 }}
               >
                 <Plus size={36} strokeWidth={2.6} color={selectedBoard.themeColor} />
@@ -1093,13 +1108,14 @@ export default function KidsHome({ onOpenMenu }) {
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#EBF6EE",
+        backgroundColor: isDark ? "#0B1320" : "#EBF6EE",
         padding: "24px 32px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
+        transition: "background-color 0.25s ease",
       }}
     >
       {/* Padrão decorativo de pontinhos */}
@@ -1110,7 +1126,7 @@ export default function KidsHome({ onOpenMenu }) {
           right: "80px",
           width: "120px",
           height: "100px",
-          backgroundImage: "radial-gradient(#86efac 2.8px, transparent 2.8px)",
+          backgroundImage: `radial-gradient(${isDark ? "#166534" : "#86efac"} 2.8px, transparent 2.8px)`,
           backgroundSize: "16px 16px",
           zIndex: 0,
           pointerEvents: "none",
@@ -1123,7 +1139,7 @@ export default function KidsHome({ onOpenMenu }) {
           left: "20px",
           width: "80px",
           height: "160px",
-          backgroundImage: "radial-gradient(#86efac 2.8px, transparent 2.8px)",
+          backgroundImage: `radial-gradient(${isDark ? "#166534" : "#86efac"} 2.8px, transparent 2.8px)`,
           backgroundSize: "16px 16px",
           zIndex: 0,
           pointerEvents: "none",
@@ -1135,13 +1151,16 @@ export default function KidsHome({ onOpenMenu }) {
         style={{
           width: "100%",
           maxWidth: "1060px",
-          backgroundColor: "#FFFFFF",
+          backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
           borderRadius: "32px",
-          boxShadow: "0 16px 48px rgba(34, 197, 94, 0.12), 0 4px 16px rgba(0,0,0,0.04)",
-          border: "2px solid #DCFCE7",
+          boxShadow: isDark
+            ? "0 16px 48px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3)"
+            : "0 16px 48px rgba(34, 197, 94, 0.12), 0 4px 16px rgba(0,0,0,0.04)",
+          border: isDark ? "2px solid #334155" : "2px solid #DCFCE7",
           padding: "28px 40px 40px 40px",
           position: "relative",
           zIndex: 1,
+          transition: "background-color 0.25s ease, border-color 0.25s ease",
         }}
       >
         {/* Top Header of the Internal Page */}
@@ -1164,7 +1183,7 @@ export default function KidsHome({ onOpenMenu }) {
                 style={{
                   fontSize: "20px",
                   fontWeight: "800",
-                  color: "#1E293B",
+                  color: isDark ? "#F8FAFC" : "#1E293B",
                   letterSpacing: "-0.2px",
                 }}
               >
@@ -1173,32 +1192,37 @@ export default function KidsHome({ onOpenMenu }) {
             </div>
           </div>
 
-          {/* Right: Hamburger Menu Button */}
-          <button
-            onClick={onOpenMenu}
-            aria-label="Abrir menu"
-            style={{
-              padding: "10px",
-              borderRadius: "12px",
-              color: "#22C55E",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "transform 0.15s ease",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#F0FDF4")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-          >
-            <Menu size={34} strokeWidth={2.4} />
-          </button>
+          {/* Right: Theme Toggle & Hamburger Menu Button */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <ThemeToggle />
+            <button
+              onClick={onOpenMenu}
+              aria-label="Abrir menu"
+              style={{
+                padding: "10px",
+                borderRadius: "12px",
+                color: isDark ? "#4ADE80" : "#22C55E",
+                backgroundColor: isDark ? "#0F172A" : "transparent",
+                border: isDark ? "1.5px solid #334155" : "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "transform 0.15s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = isDark ? "#334155" : "#F0FDF4")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = isDark ? "#0F172A" : "transparent")}
+            >
+              <Menu size={34} strokeWidth={2.4} />
+            </button>
+          </div>
         </header>
 
         {/* Real-time speaking banner */}
         {speakingText && (
           <div
             style={{
-              backgroundColor: "#DCFCE7",
-              color: "#166534",
+              backgroundColor: isDark ? "#14532D40" : "#DCFCE7",
+              color: isDark ? "#4ADE80" : "#166534",
               padding: "10px 20px",
               borderRadius: "14px",
               marginBottom: "20px",
@@ -1232,19 +1256,19 @@ export default function KidsHome({ onOpenMenu }) {
               onKeyDown={(e) => e.key === "Enter" && handleCardClick(board)}
               style={{
                 borderRadius: "22px",
-                border: `2px solid ${board.borderColor}`,
+                border: isDark ? `2px solid ${board.borderColor}70` : `2px solid ${board.borderColor}`,
                 overflow: "hidden",
                 cursor: "pointer",
-                backgroundColor: "#FFFFFF",
+                backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
                 display: "flex",
                 flexDirection: "column",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.03)",
+                boxShadow: isDark ? "0 4px 14px rgba(0, 0, 0, 0.25)" : "0 4px 12px rgba(0, 0, 0, 0.03)",
               }}
             >
               {/* Top part with background color and icon illustration */}
               <div
                 style={{
-                  backgroundColor: board.bgTop,
+                  backgroundColor: isDark ? "#1E293B" : board.bgTop,
                   padding: "18px 0 12px 0",
                   display: "flex",
                   alignItems: "center",
@@ -1259,10 +1283,10 @@ export default function KidsHome({ onOpenMenu }) {
               {/* Bottom part with board title in color */}
               <div
                 style={{
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
                   padding: "14px 12px",
                   textAlign: "center",
-                  borderTop: `1px solid ${board.borderColor}50`,
+                  borderTop: isDark ? `1px solid ${board.borderColor}40` : `1px solid ${board.borderColor}50`,
                 }}
               >
                 <span

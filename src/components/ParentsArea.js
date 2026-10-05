@@ -2,7 +2,9 @@
 
 import React, { useState, useRef } from "react";
 import Logo from "./Logo";
+import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import {
   Menu,
   BarChart3,
@@ -19,6 +21,7 @@ import {
 
 export default function ParentsArea({ onBackToKids, onOpenMenu }) {
   const { profile, stats, addNewPhrase } = useAuth();
+  const { isDark } = useTheme();
 
   const [phraseText, setPhraseText] = useState("");
   const [selectedBoardId, setSelectedBoardId] = useState("");
@@ -81,12 +84,13 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#EBF6EE",
+        backgroundColor: isDark ? "#0B1320" : "#EBF6EE",
         padding: "24px 32px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         position: "relative",
+        transition: "background-color 0.25s ease",
       }}
     >
       {/* Decorative Dots Pattern like Tela4.jpeg */}
@@ -97,7 +101,7 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
           right: "90px",
           width: "120px",
           height: "90px",
-          backgroundImage: "radial-gradient(#86efac 2.8px, transparent 2.8px)",
+          backgroundImage: `radial-gradient(${isDark ? "#166534" : "#86efac"} 2.8px, transparent 2.8px)`,
           backgroundSize: "16px 16px",
           zIndex: 0,
           pointerEvents: "none",
@@ -110,7 +114,7 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
           left: "20px",
           width: "80px",
           height: "160px",
-          backgroundImage: "radial-gradient(#86efac 2.8px, transparent 2.8px)",
+          backgroundImage: `radial-gradient(${isDark ? "#166534" : "#86efac"} 2.8px, transparent 2.8px)`,
           backgroundSize: "16px 16px",
           zIndex: 0,
           pointerEvents: "none",
@@ -122,13 +126,16 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
         style={{
           width: "100%",
           maxWidth: "1120px",
-          backgroundColor: "#FFFFFF",
+          backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
           borderRadius: "32px",
-          boxShadow: "0 16px 48px rgba(34, 197, 94, 0.12), 0 4px 16px rgba(0,0,0,0.04)",
-          border: "2px solid #DCFCE7",
+          boxShadow: isDark
+            ? "0 16px 48px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3)"
+            : "0 16px 48px rgba(34, 197, 94, 0.12), 0 4px 16px rgba(0,0,0,0.04)",
+          border: isDark ? "2px solid #334155" : "2px solid #DCFCE7",
           padding: "28px 44px 44px 44px",
           position: "relative",
           zIndex: 1,
+          transition: "background-color 0.25s ease, border-color 0.25s ease",
         }}
       >
         {/* Top Header of Área dos Pais matching Tela4.jpeg */}
@@ -138,7 +145,7 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
             gridTemplateColumns: "1fr auto 1fr",
             alignItems: "center",
             paddingBottom: "18px",
-            borderBottom: "1px solid #F1F5F9",
+            borderBottom: isDark ? "1px solid #334155" : "1px solid #F1F5F9",
             marginBottom: "28px",
           }}
         >
@@ -177,8 +184,10 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
             <span>Área dos Pais</span>
           </div>
 
-          {/* Right: Actions (Voltar para Modo Criança + Hamburger Menu) */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "12px" }}>
+          {/* Right: Actions (Theme Toggle + Voltar para Modo Criança + Hamburger Menu) */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "10px" }}>
+            <ThemeToggle />
+
             <button
               onClick={onBackToKids}
               style={{
@@ -187,11 +196,11 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
                 gap: "6px",
                 padding: "8px 16px",
                 borderRadius: "12px",
-                backgroundColor: "#F0FDF4",
-                color: "#16A34A",
+                backgroundColor: isDark ? "#0F172A" : "#F0FDF4",
+                color: isDark ? "#4ADE80" : "#16A34A",
                 fontWeight: "700",
                 fontSize: "14px",
-                border: "1px solid #BBF7D0",
+                border: isDark ? "1px solid #334155" : "1px solid #BBF7D0",
               }}
             >
               <ArrowLeft size={16} />
@@ -204,7 +213,9 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
               style={{
                 padding: "8px",
                 borderRadius: "10px",
-                color: "#22C55E",
+                color: isDark ? "#4ADE80" : "#22C55E",
+                backgroundColor: isDark ? "#0F172A" : "transparent",
+                border: isDark ? "1px solid #334155" : "none",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -229,7 +240,7 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
               style={{
                 fontSize: "22px",
                 fontWeight: "800",
-                color: "#1E293B",
+                color: isDark ? "#F8FAFC" : "#1E293B",
               }}
             >
               Olá, {profile.parentName || "Nome do Responsável"}
@@ -248,15 +259,15 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
               gap: "8px",
               padding: "10px 22px",
               borderRadius: "12px",
-              border: "1.5px solid #86EFAC",
-              backgroundColor: "#F0FDF4",
-              color: "#15803D",
+              border: isDark ? "1.5px solid #166534" : "1.5px solid #86EFAC",
+              backgroundColor: isDark ? "#14532D35" : "#F0FDF4",
+              color: isDark ? "#4ADE80" : "#15803D",
               fontWeight: "700",
               fontSize: "15px",
               boxShadow: "0 2px 8px rgba(34, 197, 94, 0.08)",
             }}
           >
-            <Sparkles size={18} color="#16A34A" />
+            <Sparkles size={18} color={isDark ? "#4ADE80" : "#16A34A"} />
             <span>Nova Frase</span>
           </button>
         </div>
@@ -265,9 +276,9 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
         {successNotice && (
           <div
             style={{
-              backgroundColor: "#ECFDF5",
-              color: "#065F46",
-              border: "1px solid #A7F3D0",
+              backgroundColor: isDark ? "#064E3B40" : "#ECFDF5",
+              color: isDark ? "#6EE7B7" : "#065F46",
+              border: isDark ? "1px solid #065F46" : "1px solid #A7F3D0",
               borderRadius: "14px",
               padding: "14px 20px",
               marginBottom: "24px",
@@ -277,7 +288,7 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
               fontWeight: "700",
             }}
           >
-            <CheckCircle2 size={20} color="#059669" />
+            <CheckCircle2 size={20} color={isDark ? "#34D399" : "#059669"} />
             <span>{successNotice}</span>
           </div>
         )}
@@ -299,13 +310,13 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
             {/* Card 1: Pranchas mais usadas */}
             <div
               style={{
-                backgroundColor: "#F8FCF9",
+                backgroundColor: isDark ? "#0F172A" : "#F8FCF9",
                 borderRadius: "22px",
-                border: "1.5px solid #DCFCE7",
+                border: isDark ? "1.5px solid #334155" : "1.5px solid #DCFCE7",
                 padding: "24px",
                 position: "relative",
                 overflow: "hidden",
-                boxShadow: "0 4px 16px rgba(0, 0, 0, 0.02)",
+                boxShadow: isDark ? "0 4px 16px rgba(0, 0, 0, 0.25)" : "0 4px 16px rgba(0, 0, 0, 0.02)",
               }}
             >
               {/* Subtle background foliage illustration */}
@@ -314,7 +325,7 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
                   position: "absolute",
                   top: "10px",
                   right: "10px",
-                  opacity: 0.15,
+                  opacity: isDark ? 0.08 : 0.15,
                   pointerEvents: "none",
                 }}
               >
@@ -330,40 +341,40 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
                   alignItems: "center",
                   gap: "10px",
                   marginBottom: "18px",
-                  color: "#16A34A",
+                  color: isDark ? "#4ADE80" : "#16A34A",
                   fontWeight: "800",
                   fontSize: "17px",
                 }}
               >
-                <BarChart3 size={22} color="#16A34A" strokeWidth={2.4} />
+                <BarChart3 size={22} color={isDark ? "#4ADE80" : "#16A34A"} strokeWidth={2.4} />
                 <span>Pranchas mais usadas</span>
               </div>
 
               {/* Inner White Box */}
               <div
                 style={{
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
                   borderRadius: "16px",
-                  border: "1px solid #E2E8F0",
+                  border: isDark ? "1px solid #334155" : "1px solid #E2E8F0",
                   padding: "22px 20px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+                  boxShadow: isDark ? "0 2px 8px rgba(0,0,0,0.15)" : "0 2px 8px rgba(0,0,0,0.03)",
                 }}
               >
                 <p
                   style={{
                     fontSize: "15px",
                     lineHeight: "1.65",
-                    color: "#334155",
+                    color: isDark ? "#CBD5E1" : "#334155",
                     fontWeight: "600",
                   }}
                 >
-                  <strong style={{ color: "#0F172A" }}>{profile.kidName || "Nome da criança"}</strong>{" "}
+                  <strong style={{ color: isDark ? "#F8FAFC" : "#0F172A" }}>{profile.kidName || "Nome da criança"}</strong>{" "}
                   usou a ({" "}
-                  <span style={{ color: "#16A34A", fontWeight: "700" }}>
+                  <span style={{ color: isDark ? "#4ADE80" : "#16A34A", fontWeight: "700" }}>
                     {stats?.topBoard?.name || "Alimentação"}
                   </span>{" "}
                   ) ao total de ({" "}
-                  <span style={{ color: "#16A34A", fontWeight: "700" }}>
+                  <span style={{ color: isDark ? "#4ADE80" : "#16A34A", fontWeight: "700" }}>
                     {stats?.topBoard?.count || 12}
                   </span>{" "}
                   ) vezes.
@@ -374,13 +385,13 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
             {/* Card 2: Frases mais usadas */}
             <div
               style={{
-                backgroundColor: "#F8FCF9",
+                backgroundColor: isDark ? "#0F172A" : "#F8FCF9",
                 borderRadius: "22px",
-                border: "1.5px solid #DCFCE7",
+                border: isDark ? "1.5px solid #334155" : "1.5px solid #DCFCE7",
                 padding: "24px",
                 position: "relative",
                 overflow: "hidden",
-                boxShadow: "0 4px 16px rgba(0, 0, 0, 0.02)",
+                boxShadow: isDark ? "0 4px 16px rgba(0, 0, 0, 0.25)" : "0 4px 16px rgba(0, 0, 0, 0.02)",
               }}
             >
               {/* Title with speech bubble icon */}
@@ -390,40 +401,40 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
                   alignItems: "center",
                   gap: "10px",
                   marginBottom: "18px",
-                  color: "#16A34A",
+                  color: isDark ? "#4ADE80" : "#16A34A",
                   fontWeight: "800",
                   fontSize: "17px",
                 }}
               >
-                <MessageSquare size={22} color="#16A34A" strokeWidth={2.4} />
+                <MessageSquare size={22} color={isDark ? "#4ADE80" : "#16A34A"} strokeWidth={2.4} />
                 <span>Frases mais usadas</span>
               </div>
 
               {/* Inner White Box */}
               <div
                 style={{
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
                   borderRadius: "16px",
-                  border: "1px solid #E2E8F0",
+                  border: isDark ? "1px solid #334155" : "1px solid #E2E8F0",
                   padding: "22px 20px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+                  boxShadow: isDark ? "0 2px 8px rgba(0,0,0,0.15)" : "0 2px 8px rgba(0,0,0,0.03)",
                 }}
               >
                 <p
                   style={{
                     fontSize: "15px",
                     lineHeight: "1.65",
-                    color: "#334155",
+                    color: isDark ? "#CBD5E1" : "#334155",
                     fontWeight: "600",
                   }}
                 >
-                  <strong style={{ color: "#0F172A" }}>{profile.kidName || "Nome da criança"}</strong>{" "}
+                  <strong style={{ color: isDark ? "#F8FAFC" : "#0F172A" }}>{profile.kidName || "Nome da criança"}</strong>{" "}
                   usou a ({" "}
-                  <span style={{ color: "#16A34A", fontWeight: "700" }}>
+                  <span style={{ color: isDark ? "#4ADE80" : "#16A34A", fontWeight: "700" }}>
                     {stats?.topPhrase?.name || "Quero comer"}
                   </span>{" "}
                   ) ao total de ({" "}
-                  <span style={{ color: "#16A34A", fontWeight: "700" }}>
+                  <span style={{ color: isDark ? "#4ADE80" : "#16A34A", fontWeight: "700" }}>
                     {stats?.topPhrase?.count || 8}
                   </span>{" "}
                   ) vezes.
@@ -446,9 +457,9 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
             {/* Box 1: Adicionar Imagem */}
             <div
               style={{
-                backgroundColor: "#F8FCF9",
+                backgroundColor: isDark ? "#0F172A" : "#F8FCF9",
                 borderRadius: "22px",
-                border: "1.5px solid #DCFCE7",
+                border: isDark ? "1.5px solid #334155" : "1.5px solid #DCFCE7",
                 padding: "20px 24px",
               }}
             >
@@ -458,12 +469,12 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
                   alignItems: "center",
                   gap: "10px",
                   marginBottom: "14px",
-                  color: "#16A34A",
+                  color: isDark ? "#4ADE80" : "#16A34A",
                   fontWeight: "800",
                   fontSize: "16px",
                 }}
               >
-                <ImageIcon size={20} color="#16A34A" strokeWidth={2.4} />
+                <ImageIcon size={20} color={isDark ? "#4ADE80" : "#16A34A"} strokeWidth={2.4} />
                 <span>Adicionar Imagem</span>
               </div>
 
@@ -471,9 +482,9 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
               <div
                 onClick={() => fileInputRef.current?.click()}
                 style={{
-                  border: "2px dashed #86EFAC",
+                  border: isDark ? "2px dashed #166534" : "2px dashed #86EFAC",
                   borderRadius: "16px",
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
                   padding: "24px 16px",
                   display: "flex",
                   flexDirection: "column",
@@ -484,8 +495,8 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
                   minHeight: "120px",
                   transition: "background-color 0.15s ease",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#F0FDF4")}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#FFFFFF")}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = isDark ? "#334155" : "#F0FDF4")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = isDark ? "#1E293B" : "#FFFFFF")}
               >
                 <input
                   type="file"
@@ -505,14 +516,14 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
                         height: "60px",
                         objectFit: "cover",
                         borderRadius: "10px",
-                        border: "1px solid #CBD5E1",
+                        border: isDark ? "1px solid #475569" : "1px solid #CBD5E1",
                       }}
                     />
                     <div style={{ textAlign: "left" }}>
-                      <p style={{ fontSize: "14px", fontWeight: "700", color: "#16A34A" }}>
+                      <p style={{ fontSize: "14px", fontWeight: "700", color: isDark ? "#4ADE80" : "#16A34A" }}>
                         Imagem selecionada!
                       </p>
-                      <span style={{ fontSize: "12px", color: "#64748B" }}>
+                      <span style={{ fontSize: "12px", color: isDark ? "#94A3B8" : "#64748B" }}>
                         Clique para trocar
                       </span>
                     </div>
@@ -520,7 +531,7 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
                 ) : (
                   <>
                     <UploadCloud size={38} color="#22C55E" strokeWidth={1.8} style={{ marginBottom: "8px" }} />
-                    <p style={{ fontSize: "13px", color: "#64748B", fontWeight: "600" }}>
+                    <p style={{ fontSize: "13px", color: isDark ? "#94A3B8" : "#64748B", fontWeight: "600" }}>
                       Clique para enviar ou arraste a imagem aqui
                     </p>
                   </>
@@ -531,9 +542,9 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
             {/* Box 2: Adicionar texto da frase */}
             <div
               style={{
-                backgroundColor: "#F8FCF9",
+                backgroundColor: isDark ? "#0F172A" : "#F8FCF9",
                 borderRadius: "22px",
-                border: "1.5px solid #DCFCE7",
+                border: isDark ? "1.5px solid #334155" : "1.5px solid #DCFCE7",
                 padding: "20px 24px",
               }}
             >
@@ -543,12 +554,12 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
                   alignItems: "center",
                   gap: "10px",
                   marginBottom: "14px",
-                  color: "#16A34A",
+                  color: isDark ? "#4ADE80" : "#16A34A",
                   fontWeight: "800",
                   fontSize: "16px",
                 }}
               >
-                <Pencil size={20} color="#16A34A" strokeWidth={2.4} />
+                <Pencil size={20} color={isDark ? "#4ADE80" : "#16A34A"} strokeWidth={2.4} />
                 <span>Adicionar texto da frase</span>
               </div>
 
@@ -563,23 +574,23 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
                   width: "100%",
                   padding: "14px 18px",
                   borderRadius: "14px",
-                  border: "1.5px solid #E2E8F0",
-                  backgroundColor: "#FFFFFF",
+                  border: isDark ? "1.5px solid #334155" : "1.5px solid #E2E8F0",
+                  backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
                   fontSize: "14px",
                   outline: "none",
-                  color: "#1E293B",
+                  color: isDark ? "#F8FAFC" : "#1E293B",
                 }}
                 onFocus={(e) => (e.target.style.borderColor = "#2DB34A")}
-                onBlur={(e) => (e.target.style.borderColor = "#E2E8F0")}
+                onBlur={(e) => (e.target.style.borderColor = isDark ? "#334155" : "#E2E8F0")}
               />
             </div>
 
             {/* Box 3: Prancha que será adicionada */}
             <div
               style={{
-                backgroundColor: "#F8FCF9",
+                backgroundColor: isDark ? "#0F172A" : "#F8FCF9",
                 borderRadius: "22px",
-                border: "1.5px solid #DCFCE7",
+                border: isDark ? "1.5px solid #334155" : "1.5px solid #DCFCE7",
                 padding: "20px 24px",
               }}
             >
@@ -589,12 +600,12 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
                   alignItems: "center",
                   gap: "10px",
                   marginBottom: "14px",
-                  color: "#16A34A",
+                  color: isDark ? "#4ADE80" : "#16A34A",
                   fontWeight: "800",
                   fontSize: "16px",
                 }}
               >
-                <LayoutGrid size={20} color="#16A34A" strokeWidth={2.4} />
+                <LayoutGrid size={20} color={isDark ? "#4ADE80" : "#16A34A"} strokeWidth={2.4} />
                 <span>Prancha que será adicionada</span>
               </div>
 
@@ -607,21 +618,21 @@ export default function ParentsArea({ onBackToKids, onOpenMenu }) {
                   width: "100%",
                   padding: "14px 18px",
                   borderRadius: "14px",
-                  border: "1.5px solid #E2E8F0",
-                  backgroundColor: "#FFFFFF",
+                  border: isDark ? "1.5px solid #334155" : "1.5px solid #E2E8F0",
+                  backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
                   fontSize: "14px",
                   outline: "none",
-                  color: selectedBoardId ? "#1E293B" : "#94A3B8",
+                  color: selectedBoardId ? (isDark ? "#F8FAFC" : "#1E293B") : (isDark ? "#94A3B8" : "#94A3B8"),
                   cursor: "pointer",
                 }}
                 onFocus={(e) => (e.target.style.borderColor = "#2DB34A")}
-                onBlur={(e) => (e.target.style.borderColor = "#E2E8F0")}
+                onBlur={(e) => (e.target.style.borderColor = isDark ? "#334155" : "#E2E8F0")}
               >
                 <option value="" disabled>
                   Selecione uma prancha...
                 </option>
                 {boardOptions.map((opt) => (
-                  <option key={opt.id} value={opt.id} style={{ color: "#1E293B" }}>
+                  <option key={opt.id} value={opt.id} style={{ color: isDark ? "#F8FAFC" : "#1E293B", backgroundColor: isDark ? "#1E293B" : "#FFFFFF" }}>
                     {opt.name}
                   </option>
                 ))}

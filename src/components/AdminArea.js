@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Logo from "./Logo";
+import ThemeToggle from "./ThemeToggle";
+import { useTheme } from "@/context/ThemeContext";
 import { getAllProfiles } from "@/lib/supabase";
 import {
   Users,
@@ -17,6 +19,7 @@ import {
 } from "lucide-react";
 
 export default function AdminArea({ onLogout }) {
+  const { isDark } = useTheme();
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -69,25 +72,28 @@ export default function AdminArea({ onLogout }) {
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#F7FAF8",
+        backgroundColor: isDark ? "#0B1320" : "#F7FAF8",
+        color: isDark ? "#F8FAFC" : "#1E293B",
         fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
         display: "flex",
         flexDirection: "column",
+        transition: "background-color 0.25s ease",
       }}
     >
       {/* Top Navbar */}
       <header
         style={{
-          backgroundColor: "#FFFFFF",
-          borderBottom: "1px solid #E2E8F0",
+          backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
+          borderBottom: isDark ? "1px solid #334155" : "1px solid #E2E8F0",
           padding: "16px 24px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+          boxShadow: isDark ? "0 1px 3px rgba(0,0,0,0.3)" : "0 1px 3px rgba(0,0,0,0.05)",
           position: "sticky",
           top: 0,
           zIndex: 10,
+          transition: "background-color 0.25s ease, border-color 0.25s ease",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -97,8 +103,9 @@ export default function AdminArea({ onLogout }) {
               display: "inline-flex",
               alignItems: "center",
               gap: "6px",
-              backgroundColor: "#DCFCE7",
-              color: "#166534",
+              backgroundColor: isDark ? "#14532D40" : "#DCFCE7",
+              color: isDark ? "#4ADE80" : "#166534",
+              border: isDark ? "1px solid #166534" : "none",
               padding: "4px 12px",
               borderRadius: "9999px",
               fontSize: "13px",
@@ -110,34 +117,38 @@ export default function AdminArea({ onLogout }) {
           </div>
         </div>
 
-        <button
-          onClick={onLogout}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            backgroundColor: "#FEE2E2",
-            color: "#991B1B",
-            border: "1px solid #FCA5A5",
-            borderRadius: "10px",
-            padding: "8px 16px",
-            fontSize: "14px",
-            fontWeight: 600,
-            cursor: "pointer",
-            transition: "all 0.2s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#FCA5A5";
-            e.currentTarget.style.color = "#7F1D1D";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "#FEE2E2";
-            e.currentTarget.style.color = "#991B1B";
-          }}
-        >
-          <LogOut size={16} />
-          Sair da Conta
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <ThemeToggle />
+
+          <button
+            onClick={onLogout}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              backgroundColor: isDark ? "#450A0A40" : "#FEE2E2",
+              color: isDark ? "#FCA5A5" : "#991B1B",
+              border: isDark ? "1px solid #991B1B" : "1px solid #FCA5A5",
+              borderRadius: "10px",
+              padding: "8px 16px",
+              fontSize: "14px",
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = isDark ? "#7F1D1D" : "#FCA5A5";
+              e.currentTarget.style.color = "#FFFFFF";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = isDark ? "#450A0A40" : "#FEE2E2";
+              e.currentTarget.style.color = isDark ? "#FCA5A5" : "#991B1B";
+            }}
+          >
+            <LogOut size={16} />
+            Sair da Conta
+          </button>
+        </div>
       </header>
 
       {/* Main Content */}
@@ -166,7 +177,7 @@ export default function AdminArea({ onLogout }) {
               style={{
                 fontSize: "26px",
                 fontWeight: 700,
-                color: "#1E293B",
+                color: isDark ? "#F8FAFC" : "#1E293B",
                 margin: 0,
                 display: "flex",
                 alignItems: "center",
@@ -179,7 +190,7 @@ export default function AdminArea({ onLogout }) {
             <p
               style={{
                 fontSize: "14px",
-                color: "#64748B",
+                color: isDark ? "#94A3B8" : "#64748B",
                 margin: "4px 0 0 0",
               }}
             >
@@ -190,12 +201,12 @@ export default function AdminArea({ onLogout }) {
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <div
               style={{
-                backgroundColor: "#FFFFFF",
-                border: "1px solid #E2E8F0",
+                backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
+                border: isDark ? "1px solid #334155" : "1px solid #E2E8F0",
                 padding: "8px 16px",
                 borderRadius: "12px",
                 fontSize: "14px",
-                color: "#334155",
+                color: isDark ? "#E2E8F0" : "#334155",
                 fontWeight: 600,
                 boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
               }}
@@ -211,12 +222,12 @@ export default function AdminArea({ onLogout }) {
                 display: "flex",
                 alignItems: "center",
                 gap: "6px",
-                backgroundColor: "#FFFFFF",
-                border: "1px solid #CBD5E1",
+                backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
+                border: isDark ? "1px solid #334155" : "1px solid #CBD5E1",
                 borderRadius: "12px",
                 padding: "8px 14px",
                 fontSize: "14px",
-                color: "#334155",
+                color: isDark ? "#E2E8F0" : "#334155",
                 fontWeight: 600,
                 cursor: loading ? "not-allowed" : "pointer",
                 opacity: loading ? 0.6 : 1,
@@ -233,15 +244,15 @@ export default function AdminArea({ onLogout }) {
         {error && (
           <div
             style={{
-              backgroundColor: "#FEF2F2",
-              border: "1px solid #F87171",
+              backgroundColor: isDark ? "#450A0A40" : "#FEF2F2",
+              border: isDark ? "1px solid #991B1B" : "1px solid #F87171",
               borderRadius: "12px",
               padding: "16px",
               marginBottom: "20px",
               display: "flex",
               alignItems: "center",
               gap: "12px",
-              color: "#991B1B",
+              color: isDark ? "#FCA5A5" : "#991B1B",
               fontSize: "14px",
             }}
           >
@@ -268,18 +279,18 @@ export default function AdminArea({ onLogout }) {
         {/* Search Input Box */}
         <div
           style={{
-            backgroundColor: "#FFFFFF",
-            border: "1px solid #E2E8F0",
+            backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
+            border: isDark ? "1px solid #334155" : "1px solid #E2E8F0",
             borderRadius: "14px",
             padding: "16px",
             marginBottom: "20px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
+            boxShadow: isDark ? "0 2px 8px rgba(0,0,0,0.2)" : "0 2px 8px rgba(0,0,0,0.02)",
             display: "flex",
             alignItems: "center",
             gap: "12px",
           }}
         >
-          <Search size={20} color="#94A3B8" />
+          <Search size={20} color={isDark ? "#64748B" : "#94A3B8"} />
           <input
             type="text"
             placeholder="Filtrar por e-mail, nome da criança ou nome do responsável..."
@@ -290,7 +301,7 @@ export default function AdminArea({ onLogout }) {
               border: "none",
               outline: "none",
               fontSize: "15px",
-              color: "#1E293B",
+              color: isDark ? "#F8FAFC" : "#1E293B",
               backgroundColor: "transparent",
             }}
           />
@@ -300,7 +311,7 @@ export default function AdminArea({ onLogout }) {
               style={{
                 border: "none",
                 background: "transparent",
-                color: "#94A3B8",
+                color: isDark ? "#94A3B8" : "#94A3B8",
                 fontSize: "13px",
                 cursor: "pointer",
                 padding: "4px 8px",
@@ -314,10 +325,10 @@ export default function AdminArea({ onLogout }) {
         {/* Table Card */}
         <div
           style={{
-            backgroundColor: "#FFFFFF",
+            backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
             borderRadius: "16px",
-            border: "1px solid #E2E8F0",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+            border: isDark ? "1px solid #334155" : "1px solid #E2E8F0",
+            boxShadow: isDark ? "0 4px 16px rgba(0,0,0,0.25)" : "0 4px 16px rgba(0,0,0,0.04)",
             overflow: "hidden",
           }}
         >
@@ -332,8 +343,8 @@ export default function AdminArea({ onLogout }) {
               <thead>
                 <tr
                   style={{
-                    backgroundColor: "#F8FAFC",
-                    borderBottom: "1px solid #E2E8F0",
+                    backgroundColor: isDark ? "#0F172A" : "#F8FAFC",
+                    borderBottom: isDark ? "1px solid #334155" : "1px solid #E2E8F0",
                   }}
                 >
                   <th
@@ -341,7 +352,7 @@ export default function AdminArea({ onLogout }) {
                       padding: "14px 20px",
                       fontSize: "12px",
                       fontWeight: 700,
-                      color: "#475569",
+                      color: isDark ? "#94A3B8" : "#475569",
                       textTransform: "uppercase",
                       letterSpacing: "0.5px",
                     }}
@@ -356,7 +367,7 @@ export default function AdminArea({ onLogout }) {
                       padding: "14px 20px",
                       fontSize: "12px",
                       fontWeight: 700,
-                      color: "#475569",
+                      color: isDark ? "#94A3B8" : "#475569",
                       textTransform: "uppercase",
                       letterSpacing: "0.5px",
                     }}
@@ -371,7 +382,7 @@ export default function AdminArea({ onLogout }) {
                       padding: "14px 20px",
                       fontSize: "12px",
                       fontWeight: 700,
-                      color: "#475569",
+                      color: isDark ? "#94A3B8" : "#475569",
                       textTransform: "uppercase",
                       letterSpacing: "0.5px",
                     }}
@@ -386,7 +397,7 @@ export default function AdminArea({ onLogout }) {
                       padding: "14px 20px",
                       fontSize: "12px",
                       fontWeight: 700,
-                      color: "#475569",
+                      color: isDark ? "#94A3B8" : "#475569",
                       textTransform: "uppercase",
                       letterSpacing: "0.5px",
                     }}
@@ -401,7 +412,7 @@ export default function AdminArea({ onLogout }) {
                       padding: "14px 20px",
                       fontSize: "12px",
                       fontWeight: 700,
-                      color: "#475569",
+                      color: isDark ? "#94A3B8" : "#475569",
                       textTransform: "uppercase",
                       letterSpacing: "0.5px",
                       textAlign: "center",
@@ -419,7 +430,7 @@ export default function AdminArea({ onLogout }) {
                       style={{
                         padding: "48px 20px",
                         textAlign: "center",
-                        color: "#64748B",
+                        color: isDark ? "#94A3B8" : "#64748B",
                       }}
                     >
                       <div
@@ -427,7 +438,7 @@ export default function AdminArea({ onLogout }) {
                           display: "inline-block",
                           width: "32px",
                           height: "32px",
-                          border: "3px solid #DCFCE7",
+                          border: isDark ? "3px solid #166534" : "3px solid #DCFCE7",
                           borderTopColor: "#2DB34A",
                           borderRadius: "50%",
                           animation: "spin 1s linear infinite",
@@ -444,11 +455,11 @@ export default function AdminArea({ onLogout }) {
                       style={{
                         padding: "48px 20px",
                         textAlign: "center",
-                        color: "#64748B",
+                        color: isDark ? "#94A3B8" : "#64748B",
                       }}
                     >
-                      <Users size={36} color="#CBD5E1" style={{ marginBottom: "8px" }} />
-                      <div style={{ fontSize: "16px", fontWeight: 600, color: "#334155" }}>
+                      <Users size={36} color={isDark ? "#475569" : "#CBD5E1"} style={{ marginBottom: "8px" }} />
+                      <div style={{ fontSize: "16px", fontWeight: 600, color: isDark ? "#F8FAFC" : "#334155" }}>
                         Nenhum usuário encontrado
                       </div>
                       <div style={{ fontSize: "13px", marginTop: "4px" }}>
@@ -461,15 +472,15 @@ export default function AdminArea({ onLogout }) {
                     <tr
                       key={p.id || idx}
                       style={{
-                        borderBottom: idx === filteredProfiles.length - 1 ? "none" : "1px solid #F1F5F9",
-                        backgroundColor: idx % 2 === 0 ? "#FFFFFF" : "#FCFDFD",
+                        borderBottom: idx === filteredProfiles.length - 1 ? "none" : (isDark ? "1px solid #334155" : "1px solid #F1F5F9"),
+                        backgroundColor: idx % 2 === 0 ? (isDark ? "#1E293B" : "#FFFFFF") : (isDark ? "#182234" : "#FCFDFD"),
                         transition: "background-color 0.15s ease",
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = "#F8FAFC";
+                        e.currentTarget.style.backgroundColor = isDark ? "#283548" : "#F8FAFC";
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = idx % 2 === 0 ? "#FFFFFF" : "#FCFDFD";
+                        e.currentTarget.style.backgroundColor = idx % 2 === 0 ? (isDark ? "#1E293B" : "#FFFFFF") : (isDark ? "#182234" : "#FCFDFD");
                       }}
                     >
                       <td
@@ -477,7 +488,7 @@ export default function AdminArea({ onLogout }) {
                           padding: "16px 20px",
                           fontSize: "14px",
                           fontWeight: 600,
-                          color: "#0F172A",
+                          color: isDark ? "#F8FAFC" : "#0F172A",
                         }}
                       >
                         {p.email || "-"}
@@ -486,7 +497,7 @@ export default function AdminArea({ onLogout }) {
                         style={{
                           padding: "16px 20px",
                           fontSize: "14px",
-                          color: "#334155",
+                          color: isDark ? "#E2E8F0" : "#334155",
                         }}
                       >
                         {p.kidName || "-"}
@@ -495,7 +506,7 @@ export default function AdminArea({ onLogout }) {
                         style={{
                           padding: "16px 20px",
                           fontSize: "14px",
-                          color: "#334155",
+                          color: isDark ? "#E2E8F0" : "#334155",
                         }}
                       >
                         {p.parentName || "-"}
@@ -504,7 +515,7 @@ export default function AdminArea({ onLogout }) {
                         style={{
                           padding: "16px 20px",
                           fontSize: "13px",
-                          color: "#64748B",
+                          color: isDark ? "#94A3B8" : "#64748B",
                         }}
                       >
                         {formatDate(p.createdAt)}
@@ -518,8 +529,9 @@ export default function AdminArea({ onLogout }) {
                         {p.isAdmin ? (
                           <span
                             style={{
-                              backgroundColor: "#DCFCE7",
-                              color: "#166534",
+                              backgroundColor: isDark ? "#14532D50" : "#DCFCE7",
+                              color: isDark ? "#4ADE80" : "#166534",
+                              border: isDark ? "1px solid #166534" : "none",
                               padding: "4px 10px",
                               borderRadius: "9999px",
                               fontSize: "12px",

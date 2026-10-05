@@ -2,7 +2,9 @@
 
 import React, { useState } from "react";
 import Logo from "./Logo";
+import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { getStoragePublicUrl } from "@/lib/supabase";
 import {
   ShieldCheck,
@@ -19,6 +21,7 @@ import {
 
 export default function LandingPage() {
   const { login, register, isConfigured } = useAuth();
+  const { isDark } = useTheme();
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState("login"); // 'login' or 'register'
@@ -82,9 +85,10 @@ export default function LandingPage() {
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#F7FAF8",
+        backgroundColor: isDark ? "#0B1320" : "#F7FAF8",
         position: "relative",
         overflow: "hidden",
+        transition: "background-color 0.25s ease",
       }}
     >
       {/* Background Organic Green Shapes */}
@@ -97,7 +101,7 @@ export default function LandingPage() {
           height: "550px",
           borderRadius: "60% 40% 70% 30% / 50% 60% 40% 50%",
           backgroundColor: "#DCFCE7",
-          opacity: 0.65,
+          opacity: isDark ? 0.12 : 0.65,
           zIndex: 0,
           pointerEvents: "none",
         }}
@@ -111,7 +115,7 @@ export default function LandingPage() {
           height: "450px",
           borderRadius: "50% 50% 30% 70% / 60% 40% 60% 40%",
           backgroundColor: "#D1FAE5",
-          opacity: 0.5,
+          opacity: isDark ? 0.1 : 0.5,
           zIndex: 0,
           pointerEvents: "none",
         }}
@@ -151,7 +155,7 @@ export default function LandingPage() {
               style={{
                 fontSize: "16px",
                 fontWeight: "600",
-                color: "#2C3E50",
+                color: isDark ? "#F8FAFC" : "#2C3E50",
                 cursor: "pointer",
               }}
             >
@@ -162,7 +166,7 @@ export default function LandingPage() {
               style={{
                 fontSize: "16px",
                 fontWeight: "600",
-                color: "#475569",
+                color: isDark ? "#94A3B8" : "#475569",
                 cursor: "pointer",
               }}
             >
@@ -173,7 +177,7 @@ export default function LandingPage() {
               style={{
                 fontSize: "16px",
                 fontWeight: "600",
-                color: "#475569",
+                color: isDark ? "#94A3B8" : "#475569",
                 cursor: "pointer",
               }}
             >
@@ -184,7 +188,7 @@ export default function LandingPage() {
               style={{
                 fontSize: "16px",
                 fontWeight: "600",
-                color: "#475569",
+                color: isDark ? "#94A3B8" : "#475569",
                 cursor: "pointer",
               }}
             >
@@ -192,15 +196,17 @@ export default function LandingPage() {
             </a>
           </nav>
 
-          {/* Action Buttons */}
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          {/* Action Buttons & Theme Toggle */}
+          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+            <ThemeToggle />
+
             <button
               onClick={() => handleOpenAuth("login")}
               style={{
-                padding: "9px 26px",
+                padding: "9px 24px",
                 borderRadius: "10px",
                 border: "1.5px solid #2DB34A",
-                color: "#2DB34A",
+                color: isDark ? "#4ADE80" : "#2DB34A",
                 backgroundColor: "transparent",
                 fontWeight: "700",
                 fontSize: "15px",
@@ -211,7 +217,7 @@ export default function LandingPage() {
             <button
               onClick={() => handleOpenAuth("register")}
               style={{
-                padding: "10px 26px",
+                padding: "10px 24px",
                 borderRadius: "10px",
                 border: "none",
                 backgroundColor: "#2DB34A",
@@ -243,8 +249,8 @@ export default function LandingPage() {
               style={{
                 display: "inline-block",
                 padding: "7px 18px",
-                backgroundColor: "#EAF7ED",
-                color: "#2DB34A",
+                backgroundColor: isDark ? "#14532D40" : "#EAF7ED",
+                color: isDark ? "#4ADE80" : "#2DB34A",
                 fontSize: "13px",
                 fontWeight: "800",
                 borderRadius: "20px",
@@ -261,7 +267,7 @@ export default function LandingPage() {
                 fontSize: "52px",
                 lineHeight: "1.18",
                 fontWeight: "900",
-                color: "#1E293B",
+                color: isDark ? "#F8FAFC" : "#1E293B",
                 marginBottom: "22px",
               }}
             >
@@ -274,7 +280,7 @@ export default function LandingPage() {
               style={{
                 fontSize: "18px",
                 lineHeight: "1.6",
-                color: "#64748B",
+                color: isDark ? "#94A3B8" : "#64748B",
                 maxWidth: "510px",
                 marginBottom: "36px",
               }}
@@ -311,9 +317,9 @@ export default function LandingPage() {
                 style={{
                   padding: "13px 40px",
                   borderRadius: "12px",
-                  border: "1.5px solid #CBD5E1",
-                  backgroundColor: "#FFFFFF",
-                  color: "#334155",
+                  border: isDark ? "1.5px solid #475569" : "1.5px solid #CBD5E1",
+                  backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
+                  color: isDark ? "#F8FAFC" : "#334155",
                   fontWeight: "700",
                   fontSize: "16px",
                 }}
@@ -328,7 +334,7 @@ export default function LandingPage() {
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                color: "#2DB34A",
+                color: isDark ? "#4ADE80" : "#2DB34A",
                 fontWeight: "600",
                 fontSize: "15px",
               }}
@@ -355,7 +361,7 @@ export default function LandingPage() {
                 right: "-20px",
                 width: "90px",
                 height: "90px",
-                backgroundImage: "radial-gradient(#86efac 2.5px, transparent 2.5px)",
+                backgroundImage: `radial-gradient(${isDark ? "#166534" : "#86efac"} 2.5px, transparent 2.5px)`,
                 backgroundSize: "14px 14px",
                 zIndex: 1,
               }}
@@ -367,7 +373,7 @@ export default function LandingPage() {
                 left: "-15px",
                 width: "90px",
                 height: "90px",
-                backgroundImage: "radial-gradient(#86efac 2.5px, transparent 2.5px)",
+                backgroundImage: `radial-gradient(${isDark ? "#166534" : "#86efac"} 2.5px, transparent 2.5px)`,
                 backgroundSize: "14px 14px",
                 zIndex: 1,
               }}
@@ -380,11 +386,11 @@ export default function LandingPage() {
                 top: "24px",
                 left: "30px",
                 zIndex: 4,
-                backgroundColor: "#FFFFFF",
+                backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
                 borderRadius: "50%",
                 padding: "10px",
                 boxShadow: "0 8px 24px rgba(45, 179, 74, 0.18)",
-                border: "2px solid #86EFAC",
+                border: isDark ? "2px solid #166534" : "2px solid #86EFAC",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -401,9 +407,9 @@ export default function LandingPage() {
                 height: "360px",
                 borderRadius: "45% 55% 50% 50% / 50% 45% 55% 50%",
                 overflow: "hidden",
-                boxShadow: "0 20px 40px rgba(0, 0, 0, 0.08)",
-                backgroundColor: "#F0FDF4",
-                border: "4px solid #FFFFFF",
+                boxShadow: isDark ? "0 20px 40px rgba(0, 0, 0, 0.4)" : "0 20px 40px rgba(0, 0, 0, 0.08)",
+                backgroundColor: isDark ? "#1E293B" : "#F0FDF4",
+                border: isDark ? "4px solid #334155" : "4px solid #FFFFFF",
                 zIndex: 2,
               }}
             >
@@ -466,15 +472,16 @@ export default function LandingPage() {
         <section
           style={{
             marginTop: "30px",
-            backgroundColor: "#FFFFFF",
+            backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
             borderRadius: "28px",
             padding: "36px 44px",
-            boxShadow: "0 10px 30px rgba(0, 0, 0, 0.04)",
-            border: "1px solid #E2E8F0",
+            boxShadow: isDark ? "0 10px 30px rgba(0, 0, 0, 0.4)" : "0 10px 30px rgba(0, 0, 0, 0.04)",
+            border: isDark ? "1px solid #334155" : "1px solid #E2E8F0",
             display: "grid",
             gridTemplateColumns: "1.1fr 1.6fr",
             gap: "50px",
             alignItems: "center",
+            transition: "background-color 0.25s ease, border-color 0.25s ease",
           }}
         >
           {/* Card Left: Green heart and empathy statement */}
@@ -483,7 +490,7 @@ export default function LandingPage() {
               display: "flex",
               alignItems: "center",
               gap: "24px",
-              borderRight: "1px solid #EEF2F6",
+              borderRight: isDark ? "1px solid #334155" : "1px solid #EEF2F6",
               paddingRight: "40px",
             }}
           >
@@ -492,8 +499,8 @@ export default function LandingPage() {
                 width: "70px",
                 height: "70px",
                 borderRadius: "50%",
-                backgroundColor: "#F0FDF4",
-                border: "2px solid #86EFAC",
+                backgroundColor: isDark ? "#0F172A" : "#F0FDF4",
+                border: isDark ? "2px solid #166534" : "2px solid #86EFAC",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -507,7 +514,7 @@ export default function LandingPage() {
                 fontSize: "15px",
                 lineHeight: "1.6",
                 fontWeight: "700",
-                color: "#1E293B",
+                color: isDark ? "#F8FAFC" : "#1E293B",
               }}
             >
               A ausência da fala oral não reflete falta de sentimento,
@@ -521,7 +528,7 @@ export default function LandingPage() {
               style={{
                 fontSize: "20px",
                 fontWeight: "800",
-                color: "#0F172A",
+                color: isDark ? "#F8FAFC" : "#0F172A",
                 marginBottom: "12px",
               }}
             >
@@ -531,7 +538,7 @@ export default function LandingPage() {
               style={{
                 fontSize: "14px",
                 lineHeight: "1.65",
-                color: "#475569",
+                color: isDark ? "#94A3B8" : "#475569",
               }}
             >
               O Eco Kids foi criado com a intenção de ajudar a incluir todos os
@@ -552,7 +559,7 @@ export default function LandingPage() {
           style={{
             position: "fixed",
             inset: 0,
-            backgroundColor: "rgba(15, 23, 42, 0.45)",
+            backgroundColor: "rgba(15, 23, 42, 0.55)",
             backdropFilter: "blur(4px)",
             display: "flex",
             alignItems: "center",
@@ -567,14 +574,15 @@ export default function LandingPage() {
           <div
             className="animate-modal"
             style={{
-              backgroundColor: "#FFFFFF",
+              backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
               borderRadius: "24px",
               width: "100%",
               maxWidth: "460px",
               padding: "36px",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-              border: "1px solid #E2E8F0",
+              boxShadow: isDark ? "0 25px 50px -12px rgba(0, 0, 0, 0.6)" : "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              border: isDark ? "1px solid #334155" : "1px solid #E2E8F0",
               position: "relative",
+              transition: "background-color 0.25s ease, border-color 0.25s ease",
             }}
           >
             {/* Close Button */}
@@ -584,7 +592,7 @@ export default function LandingPage() {
                 position: "absolute",
                 top: "20px",
                 right: "20px",
-                color: "#94A3B8",
+                color: isDark ? "#94A3B8" : "#94A3B8",
                 padding: "6px",
                 borderRadius: "8px",
               }}
@@ -598,7 +606,7 @@ export default function LandingPage() {
               <p
                 style={{
                   fontSize: "14px",
-                  color: "#64748B",
+                  color: isDark ? "#94A3B8" : "#64748B",
                   marginTop: "8px",
                   fontWeight: "600",
                 }}
@@ -612,15 +620,15 @@ export default function LandingPage() {
             {/* Supabase status badge */}
             <div
               style={{
-                backgroundColor: isConfigured ? "#ECFDF5" : "#FEF2F2",
-                border: isConfigured ? "1px solid #A7F3D0" : "1px solid #FECACA",
+                backgroundColor: isConfigured ? (isDark ? "#064E3B40" : "#ECFDF5") : (isDark ? "#450A0A40" : "#FEF2F2"),
+                border: isConfigured ? (isDark ? "1px solid #065F46" : "1px solid #A7F3D0") : (isDark ? "1px solid #991B1B" : "1px solid #FECACA"),
                 borderRadius: "10px",
                 padding: "8px 12px",
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
                 fontSize: "12px",
-                color: isConfigured ? "#065F46" : "#991B1B",
+                color: isConfigured ? (isDark ? "#6EE7B7" : "#065F46") : (isDark ? "#FCA5A5" : "#991B1B"),
                 marginBottom: "20px",
                 fontWeight: "600",
               }}
@@ -637,7 +645,7 @@ export default function LandingPage() {
             <div
               style={{
                 display: "flex",
-                backgroundColor: "#F1F5F9",
+                backgroundColor: isDark ? "#0F172A" : "#F1F5F9",
                 borderRadius: "12px",
                 padding: "4px",
                 marginBottom: "24px",
@@ -656,10 +664,10 @@ export default function LandingPage() {
                   borderRadius: "9px",
                   fontWeight: "700",
                   fontSize: "14px",
-                  backgroundColor: authMode === "login" ? "#FFFFFF" : "transparent",
-                  color: authMode === "login" ? "#2DB34A" : "#64748B",
+                  backgroundColor: authMode === "login" ? (isDark ? "#1E293B" : "#FFFFFF") : "transparent",
+                  color: authMode === "login" ? (isDark ? "#4ADE80" : "#2DB34A") : (isDark ? "#94A3B8" : "#64748B"),
                   boxShadow:
-                    authMode === "login" ? "0 2px 6px rgba(0,0,0,0.06)" : "none",
+                    authMode === "login" ? "0 2px 6px rgba(0,0,0,0.15)" : "none",
                 }}
               >
                 Entrar
@@ -678,10 +686,10 @@ export default function LandingPage() {
                   fontWeight: "700",
                   fontSize: "14px",
                   backgroundColor:
-                    authMode === "register" ? "#FFFFFF" : "transparent",
-                  color: authMode === "register" ? "#2DB34A" : "#64748B",
+                    authMode === "register" ? (isDark ? "#1E293B" : "#FFFFFF") : "transparent",
+                  color: authMode === "register" ? (isDark ? "#4ADE80" : "#2DB34A") : (isDark ? "#94A3B8" : "#64748B"),
                   boxShadow:
-                    authMode === "register" ? "0 2px 6px rgba(0,0,0,0.06)" : "none",
+                    authMode === "register" ? "0 2px 6px rgba(0,0,0,0.15)" : "none",
                 }}
               >
                 Cadastrar
@@ -692,9 +700,9 @@ export default function LandingPage() {
             {successMsg && (
               <div
                 style={{
-                  backgroundColor: "#F0FDF4",
-                  color: "#166534",
-                  border: "1px solid #BBF7D0",
+                  backgroundColor: isDark ? "#064E3B40" : "#F0FDF4",
+                  color: isDark ? "#6EE7B7" : "#166534",
+                  border: isDark ? "1px solid #065F46" : "1px solid #BBF7D0",
                   borderRadius: "10px",
                   padding: "12px 14px",
                   fontSize: "13px",
@@ -711,9 +719,9 @@ export default function LandingPage() {
             {errorMsg && (
               <div
                 style={{
-                  backgroundColor: "#FEF2F2",
-                  color: "#B91C1C",
-                  border: "1px solid #FECACA",
+                  backgroundColor: isDark ? "#450A0A40" : "#FEF2F2",
+                  color: isDark ? "#FCA5A5" : "#B91C1C",
+                  border: isDark ? "1px solid #991B1B" : "1px solid #FECACA",
                   borderRadius: "10px",
                   padding: "12px 14px",
                   fontSize: "13px",
@@ -776,7 +784,7 @@ export default function LandingPage() {
                         display: "block",
                         fontSize: "13px",
                         fontWeight: "700",
-                        color: "#334155",
+                        color: isDark ? "#E2E8F0" : "#334155",
                         marginBottom: "6px",
                       }}
                     >
@@ -793,7 +801,9 @@ export default function LandingPage() {
                           width: "100%",
                           padding: "11px 14px",
                           borderRadius: "10px",
-                          border: "1.5px solid #CBD5E1",
+                          border: isDark ? "1.5px solid #475569" : "1.5px solid #CBD5E1",
+                          backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
+                          color: isDark ? "#F8FAFC" : "#1E293B",
                           fontSize: "14px",
                           outline: "none",
                         }}
@@ -807,7 +817,7 @@ export default function LandingPage() {
                         display: "block",
                         fontSize: "13px",
                         fontWeight: "700",
-                        color: "#334155",
+                        color: isDark ? "#E2E8F0" : "#334155",
                         marginBottom: "6px",
                       }}
                     >
@@ -823,7 +833,9 @@ export default function LandingPage() {
                         width: "100%",
                         padding: "11px 14px",
                         borderRadius: "10px",
-                        border: "1.5px solid #CBD5E1",
+                        border: isDark ? "1.5px solid #475569" : "1.5px solid #CBD5E1",
+                        backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
+                        color: isDark ? "#F8FAFC" : "#1E293B",
                         fontSize: "14px",
                         outline: "none",
                       }}
@@ -839,7 +851,7 @@ export default function LandingPage() {
                     display: "block",
                     fontSize: "13px",
                     fontWeight: "700",
-                    color: "#334155",
+                    color: isDark ? "#E2E8F0" : "#334155",
                     marginBottom: "6px",
                   }}
                 >
@@ -856,7 +868,9 @@ export default function LandingPage() {
                       width: "100%",
                       padding: "11px 14px",
                       borderRadius: "10px",
-                      border: "1.5px solid #CBD5E1",
+                      border: isDark ? "1.5px solid #475569" : "1.5px solid #CBD5E1",
+                      backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
+                      color: isDark ? "#F8FAFC" : "#1E293B",
                       fontSize: "14px",
                       outline: "none",
                     }}
@@ -871,7 +885,7 @@ export default function LandingPage() {
                     display: "block",
                     fontSize: "13px",
                     fontWeight: "700",
-                    color: "#334155",
+                    color: isDark ? "#E2E8F0" : "#334155",
                     marginBottom: "6px",
                   }}
                 >
@@ -887,7 +901,9 @@ export default function LandingPage() {
                     width: "100%",
                     padding: "11px 14px",
                     borderRadius: "10px",
-                    border: "1.5px solid #CBD5E1",
+                    border: isDark ? "1.5px solid #475569" : "1.5px solid #CBD5E1",
+                    backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
+                    color: isDark ? "#F8FAFC" : "#1E293B",
                     fontSize: "14px",
                     outline: "none",
                   }}

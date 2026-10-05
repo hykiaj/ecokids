@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { getStoragePublicUrl, uploadAvatar } from "@/lib/supabase";
 import { X, Check, UploadCloud, Smile, Sparkles } from "lucide-react";
 
@@ -12,6 +13,7 @@ export default function AvatarModal({ isOpen, onClose }) {
 
 function AvatarModalContent({ onClose }) {
   const { profile, updateProfileData } = useAuth();
+  const { isDark } = useTheme();
 
   const PRESET_AVATARS = [
     { id: "icon1.png", label: "Avatar 1", url: getStoragePublicUrl("ecokids", "icon1.png") },
@@ -98,15 +100,16 @@ function AvatarModalContent({ onClose }) {
       <div
         className="animate-modal"
         style={{
-          backgroundColor: "#FFFFFF",
+          backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
           borderRadius: "28px",
           width: "100%",
           maxWidth: "460px",
           padding: "32px 28px",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-          border: "1.5px solid #E2E8F0",
+          boxShadow: isDark ? "0 25px 50px -12px rgba(0, 0, 0, 0.6)" : "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+          border: isDark ? "1.5px solid #334155" : "1.5px solid #E2E8F0",
           position: "relative",
           textAlign: "center",
+          transition: "background-color 0.25s ease, border-color 0.25s ease",
         }}
       >
         {/* Close Button */}
@@ -116,7 +119,7 @@ function AvatarModalContent({ onClose }) {
             position: "absolute",
             top: "20px",
             right: "20px",
-            color: "#94A3B8",
+            color: isDark ? "#94A3B8" : "#94A3B8",
             padding: "4px",
             borderRadius: "8px",
           }}
@@ -132,8 +135,8 @@ function AvatarModalContent({ onClose }) {
               width: "50px",
               height: "50px",
               borderRadius: "50%",
-              backgroundColor: "#DCFCE7",
-              color: "#16A34A",
+              backgroundColor: isDark ? "#14532D40" : "#DCFCE7",
+              color: isDark ? "#4ADE80" : "#16A34A",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -142,10 +145,10 @@ function AvatarModalContent({ onClose }) {
           >
             <Smile size={28} />
           </div>
-          <h3 style={{ fontSize: "20px", fontWeight: "900", color: "#1E293B", margin: 0 }}>
+          <h3 style={{ fontSize: "20px", fontWeight: "900", color: isDark ? "#F8FAFC" : "#1E293B", margin: 0 }}>
             Escolha seu Avatar
           </h3>
-          <p style={{ fontSize: "13px", color: "#64748B", marginTop: "4px" }}>
+          <p style={{ fontSize: "13px", color: isDark ? "#94A3B8" : "#64748B", marginTop: "4px" }}>
             Selecione um dos avatares abaixo ou envie sua própria foto!
           </p>
         </div>
@@ -172,8 +175,8 @@ function AvatarModalContent({ onClose }) {
                     width: "100%",
                     height: "100%",
                     borderRadius: "50%",
-                    border: isSelected ? "3.5px solid #2DB34A" : "2.5px solid #E2E8F0",
-                    backgroundColor: "#FFFFFF",
+                    border: isSelected ? "3.5px solid #2DB34A" : isDark ? "2.5px solid #334155" : "2.5px solid #E2E8F0",
+                    backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
                     boxShadow: isSelected ? "0 0 0 4px rgba(45, 179, 74, 0.22)" : "0 2px 6px rgba(0,0,0,0.04)",
                     cursor: "pointer",
                     display: "flex",
@@ -201,7 +204,7 @@ function AvatarModalContent({ onClose }) {
                       // Fallback visual caso o arquivo ainda não esteja no bucket
                       e.currentTarget.style.display = "none";
                       if (e.currentTarget.parentElement) {
-                        e.currentTarget.parentElement.style.backgroundColor = "#F0FDF4";
+                        e.currentTarget.parentElement.style.backgroundColor = isDark ? "#14532D30" : "#F0FDF4";
                         e.currentTarget.parentElement.innerHTML = `<span style="font-size:11px;font-weight:800;color:#16A34A;">${item.id}</span>`;
                       }
                     }}
@@ -245,9 +248,9 @@ function AvatarModalContent({ onClose }) {
               justifyContent: "center",
               gap: "12px",
               padding: "10px 14px",
-              backgroundColor: "#F8FAFC",
+              backgroundColor: isDark ? "#0F172A" : "#F8FAFC",
               borderRadius: "16px",
-              border: "1.5px solid #E2E8F0",
+              border: isDark ? "1.5px solid #334155" : "1.5px solid #E2E8F0",
               marginBottom: "20px",
             }}
           >
@@ -257,7 +260,7 @@ function AvatarModalContent({ onClose }) {
                 width: "56px",
                 height: "56px",
                 borderRadius: "50%",
-                border: selectedAvatar === customAvatarUrl ? "3px solid #2DB34A" : "2px solid #CBD5E1",
+                border: selectedAvatar === customAvatarUrl ? "3px solid #2DB34A" : isDark ? "2px solid #475569" : "2px solid #CBD5E1",
                 boxShadow: selectedAvatar === customAvatarUrl ? "0 0 0 3px rgba(45, 179, 74, 0.2)" : "none",
                 overflow: "hidden",
                 clipPath: "circle(50% at 50% 50%)",
@@ -266,7 +269,7 @@ function AvatarModalContent({ onClose }) {
                 transform: "translateZ(0)",
                 cursor: "pointer",
                 flexShrink: 0,
-                backgroundColor: "#FFFFFF",
+                backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
               }}
             >
               <img
@@ -282,18 +285,18 @@ function AvatarModalContent({ onClose }) {
               />
             </div>
             <div style={{ textAlign: "left", flex: 1 }}>
-              <p style={{ fontSize: "13px", fontWeight: "700", color: "#1E293B", margin: 0 }}>
+              <p style={{ fontSize: "13px", fontWeight: "700", color: isDark ? "#F8FAFC" : "#1E293B", margin: 0 }}>
                 Foto enviada por você
               </p>
-              <span style={{ fontSize: "11px", color: "#64748B" }}>
+              <span style={{ fontSize: "11px", color: isDark ? "#94A3B8" : "#64748B" }}>
                 {selectedAvatar === customAvatarUrl ? "Selecionada como avatar" : "Clique na foto para selecionar"}
               </span>
             </div>
             {selectedAvatar === customAvatarUrl && (
               <span
                 style={{
-                  backgroundColor: "#DCFCE7",
-                  color: "#166534",
+                  backgroundColor: isDark ? "#14532D50" : "#DCFCE7",
+                  color: isDark ? "#4ADE80" : "#166534",
                   fontSize: "11px",
                   fontWeight: "800",
                   padding: "4px 8px",
@@ -323,9 +326,9 @@ function AvatarModalContent({ onClose }) {
               width: "100%",
               padding: "11px 16px",
               borderRadius: "14px",
-              border: "1.5px dashed #CBD5E1",
-              backgroundColor: "#FAFAFA",
-              color: "#475569",
+              border: isDark ? "1.5px dashed #475569" : "1.5px dashed #CBD5E1",
+              backgroundColor: isDark ? "#0F172A" : "#FAFAFA",
+              color: isDark ? "#CBD5E1" : "#475569",
               fontSize: "13px",
               fontWeight: "700",
               display: "flex",
@@ -337,16 +340,16 @@ function AvatarModalContent({ onClose }) {
             }}
             onMouseEnter={(e) => {
               if (!isUploading) {
-                e.currentTarget.style.backgroundColor = "#F0FDF4";
+                e.currentTarget.style.backgroundColor = isDark ? "#334155" : "#F0FDF4";
                 e.currentTarget.style.borderColor = "#86EFAC";
                 e.currentTarget.style.color = "#16A34A";
               }
             }}
             onMouseLeave={(e) => {
               if (!isUploading) {
-                e.currentTarget.style.backgroundColor = "#FAFAFA";
-                e.currentTarget.style.borderColor = "#CBD5E1";
-                e.currentTarget.style.color = "#475569";
+                e.currentTarget.style.backgroundColor = isDark ? "#0F172A" : "#FAFAFA";
+                e.currentTarget.style.borderColor = isDark ? "#475569" : "#CBD5E1";
+                e.currentTarget.style.color = isDark ? "#CBD5E1" : "#475569";
               }
             }}
           >
@@ -359,9 +362,9 @@ function AvatarModalContent({ onClose }) {
         {successNotice && (
           <div
             style={{
-              backgroundColor: "#ECFDF5",
-              color: "#065F46",
-              border: "1px solid #A7F3D0",
+              backgroundColor: isDark ? "#064E3B40" : "#ECFDF5",
+              color: isDark ? "#6EE7B7" : "#065F46",
+              border: isDark ? "1px solid #065F46" : "1px solid #A7F3D0",
               borderRadius: "12px",
               padding: "10px",
               fontSize: "13px",

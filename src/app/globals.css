@@ -7,10 +7,33 @@
   --primary-green-border: #a3e6b7;
   --bg-creamy: #f6fbf7;
   --card-bg: #ffffff;
-  --text-dark: #233128;
+  --card-border: #e2e8f0;
+  --text-dark: #1e293b;
   --text-muted: #64748b;
   --border-light: #e8f0eb;
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+  --subtle-bg: #f8fafc;
+  --dots-color: #86efac;
   --font-main: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+[data-theme="dark"],
+.dark {
+  --primary-green: #22c55e;
+  --primary-green-hover: #16a34a;
+  --primary-green-light: rgba(34, 197, 94, 0.15);
+  --primary-green-border: #166534;
+  --bg-creamy: #0b1320;
+  --card-bg: #1e293b;
+  --card-border: #334155;
+  --text-dark: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-light: #334155;
+  --input-bg: #0f172a;
+  --input-border: #475569;
+  --subtle-bg: #1e293b;
+  --dots-color: #14532d;
 }
 
 * {
@@ -28,6 +51,7 @@ body {
   font-family: var(--font-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 button {
