@@ -1,10 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+// Credenciais públicas do Supabase (lidas do ambiente ou fallback público do projeto)
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  "https://rpibjgxmdjydbayfxigb.supabase.co";
+
 const supabaseAnonKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-  "";
+  "sb_publishable_eD6PrXEBkkgOLYqcwjD0hg_Dp0bGw-P";
 
 export const isSupabaseConfigured = () => {
   return (
@@ -340,8 +344,8 @@ export async function uploadAvatar(file) {
 export async function authResetPassword(email) {
   if (isSupabaseConfigured() && supabase) {
     const redirectTo =
-      typeof window !== "undefined" && window.location?.origin
-        ? `${window.location.origin}/`
+      typeof window !== "undefined" && window.location?.href
+        ? window.location.href.split("#")[0].split("?")[0]
         : undefined;
 
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
