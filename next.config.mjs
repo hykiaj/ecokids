@@ -22,6 +22,10 @@ const nextConfig = {
   basePath: basePath || undefined,
   assetPrefix: basePath || undefined,
   trailingSlash: true,
+  // Expõe o basePath para o client (necessário em <img> apontando para /public)
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
+  },
 };
 
 export default nextConfig;

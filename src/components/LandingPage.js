@@ -19,16 +19,47 @@ import {
   Info,
 } from "lucide-react";
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
+// Primeira imagem vem do Supabase Storage; as demais da pasta /public.
+// `crop` recorta a área útil das imagens sistemaN (1200x896, em px), escondendo o
+// fundo cinza ao redor do card. O frame assume a proporção do recorte.
+const SISTEMA_SIZE = { w: 1200, h: 896 };
 const HERO_SLIDES = [
-  { file: "landing-page-image.jpeg", alt: "Mãe e filho usando tablet com o Eco Kids" },
-  { file: "sistema1.jpeg", alt: "Tela do sistema Eco Kids 1" },
-  { file: "sistema2.jpeg", alt: "Tela do sistema Eco Kids 2" },
-  { file: "sistema3.jpeg", alt: "Tela do sistema Eco Kids 3" },
-  { file: "sistema4.jpeg", alt: "Tela do sistema Eco Kids 4" },
-  { file: "sistema5.jpeg", alt: "Tela do sistema Eco Kids 5" },
-  { file: "sistema6.jpeg", alt: "Tela do sistema Eco Kids 6" },
+  {
+    src: getStoragePublicUrl("ecokids", "landing-page-image.jpeg"),
+    alt: "Mãe e filho usando tablet com o Eco Kids",
+  },
+  {
+    src: `${BASE_PATH}/sistema1.jpeg`,
+    alt: "Tela do sistema Eco Kids 1",
+    crop: { x: 100, y: 104, w: 1000, h: 686 },
+  },
+  {
+    src: `${BASE_PATH}/sistema2.jpeg`,
+    alt: "Tela do sistema Eco Kids 2",
+    crop: { x: 250, y: 185, w: 705, h: 595 },
+  },
+  {
+    src: `${BASE_PATH}/sistema3.jpeg`,
+    alt: "Tela do sistema Eco Kids 3",
+    crop: { x: 70, y: 186, w: 1060, h: 532 },
+  },
 ];
 const SLIDE_INTERVAL_MS = 4000;
+// Proporção do frame para o slide (4:3 quando não há recorte)
+const frameAspect = ({ crop }) => (crop ? `${crop.w} / ${crop.h}` : "4 / 3");
+
+// Posiciona a imagem para que só a área do recorte apareça no frame
+function cropStyle({ crop }) {
+  if (!crop) return { inset: 0, width: "100%", height: "100%" };
+  return {
+    left: `${(-crop.x / crop.w) * 100}%`,
+    top: `${(-crop.y / crop.h) * 100}%`,
+    width: `${(SISTEMA_SIZE.w / crop.w) * 100}%`,
+    height: `${(SISTEMA_SIZE.h / crop.h) * 100}%`,
+  };
+}
 
 export default function LandingPage() {
   const { login, register, isConfigured } = useAuth();
@@ -370,10 +401,14 @@ export default function LandingPage() {
             <div
               style={{
                 position: "relative",
-                width: "480px",
-                height: "360px",
+                // content-box: a proporção vale para a área da imagem, sem a borda de 4px
+                boxSizing: "content-box",
+                width: "calc(100% - 8px)",
+                maxWidth: "472px",
+                aspectRatio: frameAspect(HERO_SLIDES[slide]),
+                transition: "aspect-ratio 0.8s ease",
                 borderRadius: "45% 55% 50% 50% / 50% 45% 55% 50%",
-                overflow: "hidden",
+                overflow: "clip", // "clip" impede que o frame role ao focar os indicadores
                 boxShadow: isDark ? "0 20px 40px rgba(0, 0, 0, 0.4)" : "0 20px 40px rgba(0, 0, 0, 0.08)",
                 backgroundColor: isDark ? "#1E293B" : "#F0FDF4",
                 border: isDark ? "4px solid #334155" : "4px solid #FFFFFF",
@@ -382,8 +417,8 @@ export default function LandingPage() {
             >
               {HERO_SLIDES.map((s, i) => (
                 <img
-                  key={s.file}
-                  src={getStoragePublicUrl("ecokids", s.file)}
+                  key={s.src}
+                  src={s.src}
                   alt={s.alt}
                   aria-hidden={i !== slide}
                   onError={(e) => {
@@ -395,9 +430,8 @@ export default function LandingPage() {
                   }}
                   style={{
                     position: "absolute",
-                    inset: 0,
-                    width: "100%",
-                    height: "100%",
+                    ...cropStyle(s),
+                    maxWidth: "none",
                     objectFit: "cover",
                     objectPosition: "center",
                     opacity: i === slide ? 1 : 0,
@@ -420,7 +454,7 @@ export default function LandingPage() {
               >
                 {HERO_SLIDES.map((s, i) => (
                   <button
-                    key={s.file}
+                    key={s.src}
                     type="button"
                     aria-label={`Ir para imagem ${i + 1}`}
                     onClick={() => setSlide(i)}
