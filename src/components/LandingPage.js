@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Logo from "./Logo";
 import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
@@ -19,6 +19,17 @@ import {
   Info,
 } from "lucide-react";
 
+const HERO_SLIDES = [
+  { file: "landing-page-image.jpeg", alt: "Mãe e filho usando tablet com o Eco Kids" },
+  { file: "sistema1.jpeg", alt: "Tela do sistema Eco Kids 1" },
+  { file: "sistema2.jpeg", alt: "Tela do sistema Eco Kids 2" },
+  { file: "sistema3.jpeg", alt: "Tela do sistema Eco Kids 3" },
+  { file: "sistema4.jpeg", alt: "Tela do sistema Eco Kids 4" },
+  { file: "sistema5.jpeg", alt: "Tela do sistema Eco Kids 5" },
+  { file: "sistema6.jpeg", alt: "Tela do sistema Eco Kids 6" },
+];
+const SLIDE_INTERVAL_MS = 4000;
+
 export default function LandingPage() {
   const { login, register, isConfigured } = useAuth();
   const { isDark } = useTheme();
@@ -35,6 +46,16 @@ export default function LandingPage() {
   const [kidName, setKidName] = useState("");
   const [parentName, setParentName] = useState("");
   const [pin, setPin] = useState("");
+
+  // Carrossel do hero
+  const [slide, setSlide] = useState(0);
+  useEffect(() => {
+    const id = setInterval(
+      () => setSlide((s) => (s + 1) % HERO_SLIDES.length),
+      SLIDE_INTERVAL_MS
+    );
+    return () => clearInterval(id);
+  }, [slide]); // reinicia o timer quando o usuário troca manualmente
 
   const handleOpenAuth = (mode = "login") => {
     setAuthMode(mode);
@@ -141,60 +162,6 @@ export default function LandingPage() {
           }}
         >
           <Logo size="md" />
-
-          {/* Nav links */}
-          <nav
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "36px",
-            }}
-          >
-            <a
-              href="#inicio"
-              style={{
-                fontSize: "16px",
-                fontWeight: "600",
-                color: isDark ? "#F8FAFC" : "#2C3E50",
-                cursor: "pointer",
-              }}
-            >
-              Inicio
-            </a>
-            <a
-              href="#sobre"
-              style={{
-                fontSize: "16px",
-                fontWeight: "600",
-                color: isDark ? "#94A3B8" : "#475569",
-                cursor: "pointer",
-              }}
-            >
-              Sobre
-            </a>
-            <a
-              href="#recursos"
-              style={{
-                fontSize: "16px",
-                fontWeight: "600",
-                color: isDark ? "#94A3B8" : "#475569",
-                cursor: "pointer",
-              }}
-            >
-              Recursos
-            </a>
-            <a
-              href="#contato"
-              style={{
-                fontSize: "16px",
-                fontWeight: "600",
-                color: isDark ? "#94A3B8" : "#475569",
-                cursor: "pointer",
-              }}
-            >
-              Contato
-            </a>
-          </nav>
 
           {/* Action Buttons & Theme Toggle */}
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
@@ -413,21 +380,64 @@ export default function LandingPage() {
                 zIndex: 2,
               }}
             >
-              <img
-                src={getStoragePublicUrl("ecokids", "landing-page-image.jpeg")}
-                alt="Mãe e filho usando tablet com o Eco Kids"
-                onError={(e) => {
-                  // Fallback temporário caso o arquivo ainda não tenha sido carregado no bucket
-                  e.currentTarget.src =
-                    "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop";
-                }}
+              {HERO_SLIDES.map((s, i) => (
+                <img
+                  key={s.file}
+                  src={getStoragePublicUrl("ecokids", s.file)}
+                  alt={s.alt}
+                  aria-hidden={i !== slide}
+                  onError={(e) => {
+                    // Fallback temporário caso a imagem principal ainda não esteja no bucket
+                    if (i === 0) {
+                      e.currentTarget.src =
+                        "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop";
+                    }
+                  }}
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    objectPosition: "center",
+                    opacity: i === slide ? 1 : 0,
+                    transition: "opacity 0.8s ease",
+                  }}
+                />
+              ))}
+
+              {/* Indicadores do carrossel */}
+              <div
                 style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  objectPosition: "center",
+                  position: "absolute",
+                  bottom: "18px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  display: "flex",
+                  gap: "8px",
+                  zIndex: 3,
                 }}
-              />
+              >
+                {HERO_SLIDES.map((s, i) => (
+                  <button
+                    key={s.file}
+                    type="button"
+                    aria-label={`Ir para imagem ${i + 1}`}
+                    onClick={() => setSlide(i)}
+                    style={{
+                      width: i === slide ? "22px" : "9px",
+                      height: "9px",
+                      borderRadius: "9px",
+                      border: "none",
+                      padding: 0,
+                      backgroundColor: i === slide ? "#2DB34A" : "rgba(255,255,255,0.85)",
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
+                      cursor: "pointer",
+                      transition: "width 0.3s ease, background-color 0.3s ease",
+                    }}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* 4-Piece Colored Jigsaw Puzzle Badge on bottom-right */}
